@@ -1,25 +1,59 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class Scenes
+{
+    public const string MENU_SCENE = "MenuScene";
+    public const string GAME_SCENE = "GameScene";
+}
+
+public enum ConnectionType
+{
+    UNDEFINED,
+
+    CLIENT,
+    SERVER
+}
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
     [SerializeField]
     private GameObject playerPrefab;
 
-    private GameObject player;
+    [SerializeField]
+    private InputField clientConnectIp;
 
-    private VirtualJoystick joystick;
+    public ConnectionType type = ConnectionType.UNDEFINED;
 
-    // Start is called before the first frame update
+    public string IP = "127.0.0.1";
+
     void Start()
     {
-        
+        DontDestroyOnLoad(this);
+        Instance = this;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public void CreateClientGameScene()
+    {
+        SceneManager.LoadScene(Scenes.GAME_SCENE);
+        IP = clientConnectIp.text;
+        type = ConnectionType.CLIENT;
+    }
+
+    public void CreateServerGameScene()
+    {
+        SceneManager.LoadScene(Scenes.GAME_SCENE);
+        IP = clientConnectIp.text;
+        type = ConnectionType.SERVER;
     }
 }

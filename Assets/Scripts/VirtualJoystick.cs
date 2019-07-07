@@ -10,6 +10,17 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
     private Image joystickImage;
     private Vector3 inputVector;
 
+    public Vector2 InputVector
+    {
+        get
+        {
+            convert.x = inputVector.x;
+            convert.y = inputVector.z;
+            return convert;
+        }
+    }
+    private Vector2 convert = new Vector2();
+
     void Start()
     {
         joystickImage = GetComponent<Image>();
@@ -44,14 +55,5 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
         knobImage.rectTransform.anchoredPosition = Vector3.zero;
     }
 
-    public float Horizontal()
-    {
-        return inputVector.x;
-    }
-
-    public float Vertical()
-    {
-        return inputVector.z;
-    }
 
 }
