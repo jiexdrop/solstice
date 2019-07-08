@@ -18,11 +18,11 @@ public class TCPServer
 
     private TcpClient connectedTcpClient;
 
-    public const int PORT = 7345;
-
     public Message received = new Message();
 
     private string ip = "127.0.0.1";
+
+    BinaryFormatter formatter = new BinaryFormatter();
 
     // Update is called once per frame
     void Update()
@@ -42,13 +42,13 @@ public class TCPServer
     {
         try
         {
-            tcpListener = new TcpListener(IPAddress.Parse(ip), PORT);
+            tcpListener = new TcpListener(IPAddress.Parse(ip), GameManager.PORT);
             
             tcpListener.Start();
 
             Debug.Log("Server is Listening");
 
-            byte[] bytes = new byte[1024];
+            byte[] bytes = new byte[GameManager.PACKET_LENGTH];
 
             while (true)
             {
@@ -97,10 +97,9 @@ public class TCPServer
             if (stream.CanWrite)
             {
                 
-                byte[] serverMessageAsByteArray = new byte[1024];
+                byte[] serverMessageAsByteArray = new byte[GameManager.PACKET_LENGTH];
 
                 // Serialize message
-                BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream(serverMessageAsByteArray);
 
                 formatter.Serialize(ms, message);

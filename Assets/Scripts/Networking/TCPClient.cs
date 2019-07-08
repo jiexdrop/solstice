@@ -12,11 +12,11 @@ public class TCPClient
     private TcpClient socketConnection;
     private Thread clientReceiveThread;
 
-    public const int PORT = 7345;
-
     public Message received = new Message();
 
     private string ip;
+
+    BinaryFormatter formatter = new BinaryFormatter();
 
     public void Client(string ip)
     {
@@ -43,9 +43,9 @@ public class TCPClient
     {
         try
         {
-            socketConnection = new TcpClient(ip, PORT);
+            socketConnection = new TcpClient(ip, GameManager.PORT);
 
-            byte[] bytes = new byte[1024];
+            byte[] bytes = new byte[GameManager.PACKET_LENGTH];
 
             while (true)
             {
@@ -95,9 +95,8 @@ public class TCPClient
             if (stream.CanWrite)
             {
                 // String converted
-                byte[] clientMessageAsByteArray = new byte[1024];
+                byte[] clientMessageAsByteArray = new byte[GameManager.PACKET_LENGTH];
 
-                BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream(clientMessageAsByteArray);
 
                 formatter.Serialize(ms, message);

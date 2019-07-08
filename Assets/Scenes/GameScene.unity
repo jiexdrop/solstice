@@ -1538,7 +1538,6 @@ MonoBehaviour:
   playerPrefab: {fileID: 3314557595949612381, guid: 499fd30542eaf044297e812a0d067bb7,
     type: 3}
   joystick: {fileID: 959305634}
-  ip: 
 --- !u!1 &1232996818
 GameObject:
   m_ObjectHideFlags: 0

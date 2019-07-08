@@ -17,8 +17,8 @@ public class Server : MonoBehaviour
     private Vector3 startClientPos;
     private Vector3 endClientPos;
 
-    private float frequency;
     private float timeStartedLerping;
+    private float elapsed;
 
     TCPServer s = new TCPServer();
 
@@ -32,13 +32,14 @@ public class Server : MonoBehaviour
 
             clientPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             serverPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-        } else
+        }
+        else
         {
             Destroy(this.gameObject);
             Destroy(this);
         }
     }
-    
+
     void Update()
     {
         switch (state)
@@ -47,7 +48,6 @@ public class Server : MonoBehaviour
                 break;
             case GameState.START:
                 s.ServerSend(new StartMessage());
-                StartCoroutine(SendPosition());
                 state = GameState.GAME;
                 break;
             case GameState.GAME:
@@ -55,11 +55,22 @@ public class Server : MonoBehaviour
                 speed = joystick.InputVector * Time.deltaTime * 5;
                 serverPlayer.transform.position += speed;
 
+                elapsed += Time.deltaTime;
+
+                if (elapsed >= GameManager.FREQUENCY)
+                {
+                    elapsed = elapsed % GameManager.FREQUENCY;
+                    SendPosition();
+                }
+
                 break;
         }
 
+        // Server read received messages
         switch (s.received.type)
         {
+            case MessageType.NONE:
+                break;
             case MessageType.START:
                 Debug.LogError("Recieved Start Server from client");
                 state = GameState.START;
@@ -68,35 +79,26 @@ public class Server : MonoBehaviour
                 MovementMessage mm = (MovementMessage)s.received;
                 startClientPos = clientPlayer.transform.position;
                 endClientPos = new Vector3(mm.x, mm.y);
-                frequency = mm.frequency;
                 timeStartedLerping = Time.time;
                 break;
         }
         s.received.OnRead();
 
-        // Lerp 
-        float lerpPercentage = (Time.time - timeStartedLerping) / frequency;
+        // Server movement Lerp 
+        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
         //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
         clientPlayer.transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
 
     }
 
-    public IEnumerator SendPosition()
+    public void SendPosition()
     {
-        while (true)
-        {
-            float frequency = 1.0f / 6.0f; // Sends 6 times a second
+        Debug.LogError("Sending position !");
+        MovementMessage serverMovement = new MovementMessage();
+        serverMovement.type = MessageType.SERVER;
+        serverMovement.x = serverPlayer.transform.position.x;
+        serverMovement.y = serverPlayer.transform.position.y;
 
-            yield return new WaitForSeconds(frequency);
-
-            Debug.LogError("Sending position !");
-            MovementMessage serverMovement = new MovementMessage();
-            serverMovement.type = MessageType.SERVER;
-            serverMovement.x = serverPlayer.transform.position.x;
-            serverMovement.y = serverPlayer.transform.position.y;
-            serverMovement.frequency = frequency;
-
-            s.ServerSend(serverMovement);
-        }
+        s.ServerSend(serverMovement);
     }
 }

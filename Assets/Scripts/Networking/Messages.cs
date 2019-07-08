@@ -40,7 +40,6 @@ public class MovementMessage : Message
 {
     public float x;
     public float y;
-    public float frequency;
 }
 
 [System.Serializable]
