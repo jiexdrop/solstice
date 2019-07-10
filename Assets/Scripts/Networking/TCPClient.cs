@@ -33,12 +33,6 @@ public class TCPClient
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     private void ListenForData()
     {
         try

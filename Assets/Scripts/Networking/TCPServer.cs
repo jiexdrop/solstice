@@ -24,12 +24,6 @@ public class TCPServer
 
     BinaryFormatter formatter = new BinaryFormatter();
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void Server(string ip)
     {
         this.ip = ip;
@@ -42,7 +36,8 @@ public class TCPServer
     {
         try
         {
-            tcpListener = new TcpListener(IPAddress.Parse(ip), GameManager.PORT);
+            //tcpListener = new TcpListener(IPAddress.Parse(ip), GameManager.PORT);
+            tcpListener = new TcpListener(IPAddress.Any, GameManager.PORT);
             
             tcpListener.Start();
 

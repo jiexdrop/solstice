@@ -6,6 +6,7 @@ public enum MessageType
     NONE,
 
     START,
+    SHOOT,
     CLIENT,
     SERVER,
 }
@@ -51,3 +52,11 @@ public class StartMessage : Message
     }
 }
 
+[System.Serializable]
+public class ShootMessage : Message
+{
+    public ShootMessage()
+    {
+        type = MessageType.SHOOT;
+    }
+}

@@ -1,26 +1,34 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Server : MonoBehaviour
 {
+    [Header("Prefabs")]
     public GameObject playerPrefab;
+    public GameObject projectilePrefab;
 
     private GameObject serverPlayer;
     private GameObject clientPlayer;
 
-    // Joystick server
+    private List<GameObject> projectiles = new List<GameObject>();
+
+    [Header("Controls")]
     public VirtualJoystick joystick;
+    public Button shootButton;
     private Vector3 speed = new Vector3();
 
-    // Movement of client
+    // Receive movement of client
     private Vector3 startClientPos;
     private Vector3 endClientPos;
+    // Send movement of server
+    MovementMessage serverMovement = new MovementMessage();
 
     private float timeStartedLerping;
     private float elapsed;
 
-    TCPServer s = new TCPServer();
+    UDPServer s = new UDPServer();
 
     private GameState state = GameState.STOP;
 
@@ -32,6 +40,8 @@ public class Server : MonoBehaviour
 
             clientPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
             serverPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+
+            shootButton.onClick.AddListener(ServerShoot);
         }
         else
         {
@@ -72,7 +82,7 @@ public class Server : MonoBehaviour
             case MessageType.NONE:
                 break;
             case MessageType.START:
-                Debug.LogError("Recieved Start Server from client");
+                //Debug.LogError("Recieved Start Server from client");
                 state = GameState.START;
                 break;
             case MessageType.CLIENT:
@@ -80,6 +90,9 @@ public class Server : MonoBehaviour
                 startClientPos = clientPlayer.transform.position;
                 endClientPos = new Vector3(mm.x, mm.y);
                 timeStartedLerping = Time.time;
+                break;
+            case MessageType.SHOOT:
+                ClientShoot();
                 break;
         }
         s.received.OnRead();
@@ -91,10 +104,22 @@ public class Server : MonoBehaviour
 
     }
 
+    public void ServerShoot()
+    {
+        projectiles.Add(Instantiate(projectilePrefab, serverPlayer.transform.position, Quaternion.identity));
+        ShootMessage shoot = new ShootMessage();
+        s.ServerSend(shoot);
+    }
+
+    public void ClientShoot()
+    {
+        projectiles.Add(Instantiate(projectilePrefab, clientPlayer.transform.position, Quaternion.identity));
+    }
+
+
     public void SendPosition()
     {
-        Debug.LogError("Sending position !");
-        MovementMessage serverMovement = new MovementMessage();
+        //Debug.LogError("Sending position !");
         serverMovement.type = MessageType.SERVER;
         serverMovement.x = serverPlayer.transform.position.x;
         serverMovement.y = serverPlayer.transform.position.y;
