@@ -1,14 +1,16 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 public enum MessageType
 {
     NONE,
 
-    START,
+    CLIENT_NEW_PLAYER,
+    SERVER_SHARE_PLAYERS,
+    SERVER_SHARE_MOVEMENT,
     SHOOT,
-    CLIENT,
-    SERVER,
+    MOVEMENT,
 }
 
 public enum GameState
@@ -39,16 +41,47 @@ public class Message
 [System.Serializable]
 public class MovementMessage : Message
 {
+    public int playerId;
     public float x;
     public float y;
 }
 
 [System.Serializable]
-public class StartMessage : Message
+public class ServerSharePlayersMessage : Message
 {
-    public StartMessage()
+    
+    public float[] x;
+    public float[] y;
+
+    public int playerNumber;
+
+    public ServerSharePlayersMessage()
     {
-        type = MessageType.START;
+        type = MessageType.SERVER_SHARE_PLAYERS;
+    }
+}
+
+
+[System.Serializable]
+public class ServerShareMovementMessage : Message
+{
+    public float [] x;
+    public float [] y;
+
+
+    public ServerShareMovementMessage()
+    {
+        type = MessageType.SERVER_SHARE_MOVEMENT;
+    }
+}
+
+
+[System.Serializable]
+public class ClientNewPlayerMessage : Message
+{
+    public ClientNewPlayerMessage()
+    {
+        type = MessageType.CLIENT_NEW_PLAYER;
     }
 }
 

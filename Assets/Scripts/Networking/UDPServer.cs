@@ -6,6 +6,7 @@ using System;
 using System.Net;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Collections.Generic;
 
 public class UDPServer 
 {
@@ -13,7 +14,7 @@ public class UDPServer
 
     UdpClient server;
 
-    IPEndPoint epClient;
+    List<IPEndPoint> epClients = new List<IPEndPoint>();
 
     BinaryFormatter formatter = new BinaryFormatter();
 
@@ -27,7 +28,7 @@ public class UDPServer
 
     public void ServerSend(Message message)
     {
-        if (epClient != null)
+        foreach (IPEndPoint client in epClients.ToArray())
         {
             byte[] clientMessageAsByteArray = new byte[GameManager.PACKET_LENGTH];
 
@@ -35,11 +36,7 @@ public class UDPServer
 
             formatter.Serialize(ms, message);
 
-            server.Send(clientMessageAsByteArray, clientMessageAsByteArray.Length, epClient);
-        }
-        else
-        {
-            Debug.LogError("NO CLIENT TO SEND TO");
+            server.Send(clientMessageAsByteArray, clientMessageAsByteArray.Length, client);
         }
     }
 
@@ -54,7 +51,7 @@ public class UDPServer
       
             received = (Message)formatter.Deserialize(ms);
 
-            epClient = remoteEP;
+            epClients.Add(remoteEP);
         }
     }
 }

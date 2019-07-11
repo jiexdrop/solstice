@@ -9,8 +9,10 @@ public class Client : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject projectilePrefab;
 
-    private GameObject serverPlayer;
-    private GameObject clientPlayer;
+    private int nbOfPlayers;
+    private int myNumber;
+    private bool setNumber = false;
+    private Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
 
     private List<GameObject> projectiles = new List<GameObject>();
 
@@ -39,9 +41,6 @@ public class Client : MonoBehaviour
             //Debug.LogError("Client connected with ip: " + GameManager.Instance.IP);
             c.Client(GameManager.Instance.IP);
 
-            clientPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-            serverPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-
             shootButton.onClick.AddListener(ClientShoot);
         }
         else
@@ -58,25 +57,37 @@ public class Client : MonoBehaviour
             case GameState.STOP:
 
                 // Debug.LogError("Send Start Server from client");
-                c.ClientSend(new StartMessage());
-
+                ClientNewPlayerMessage newPlayerMessage = new ClientNewPlayerMessage();
+                if (c.Connected())
+                {
+                    c.ClientSend(newPlayerMessage);
+                    state = GameState.START;
+                }
                 break;
             case GameState.START:
 
-                state = GameState.GAME;
+
 
                 break;
             case GameState.GAME:
 
                 speed = joystick.InputVector * Time.deltaTime * 5;
-                clientPlayer.transform.position += speed;
+                GameObject player;
+                players.TryGetValue(myNumber, out player);
+                if (player != null)
+                {
+                    player.transform.position += speed;
+                }
 
                 elapsed += Time.deltaTime;
 
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    SendPosition();
+                    if (player != null)
+                    {
+                        SendPosition(player);
+                    }
                 }
 
                 break;
@@ -84,50 +95,104 @@ public class Client : MonoBehaviour
 
 
         // Client read received messages
+        Debug.Log(c.received.type);
         switch (c.received.type)
         {
             case MessageType.NONE:
                 break;
-            case MessageType.START:
-                state = GameState.START;
+            case MessageType.SERVER_SHARE_PLAYERS:
+                {
+                    ServerSharePlayersMessage sharePlayersMessage = (ServerSharePlayersMessage)c.received;
+
+                    // The firt message sets the player number 
+                    if (!setNumber)
+                    {
+                        myNumber = sharePlayersMessage.playerNumber;
+                        setNumber = true;
+                    }
+
+                    // Destroy old players
+                    for (int i = 0; i < nbOfPlayers; i++)
+                    {
+                        GameObject player;
+                        players.TryGetValue(i, out player);
+                        if (player != null)
+                        {
+                            Destroy(player);
+                        }
+                    }
+                    players.Clear();
+
+                    // Add new players
+                    nbOfPlayers = sharePlayersMessage.x.Length;
+
+                    for (int i = 0; i < nbOfPlayers; i++)
+                    {
+                        players.Add(i, Instantiate(playerPrefab, new Vector2(sharePlayersMessage.x[i], sharePlayersMessage.y[i]), Quaternion.identity));
+                    }
+
+                    state = GameState.GAME;
+                }
                 break;
-            case MessageType.SERVER:
-                MovementMessage mm = (MovementMessage)c.received;
-                startServerPos = serverPlayer.transform.position;
-                endServerPos = new Vector3(mm.x, mm.y);
-                timeStartedLerping = Time.time;
+            case MessageType.MOVEMENT:
+                {
+                    //MovementMessage mm = (MovementMessage)c.received;
+                    //startServerPos = serverPlayer.transform.position;
+                    //endServerPos = new Vector3(mm.x, mm.y);
+                    //timeStartedLerping = Time.time;
+                }
+                break;
+            case MessageType.SERVER_SHARE_MOVEMENT:
+                {
+                    ServerShareMovementMessage shareMovementsMessage = (ServerShareMovementMessage)c.received;
+                    for (int i = 0; i < shareMovementsMessage.x.Length; i++)
+                    {
+                        GameObject player;
+                        players.TryGetValue(i, out player);
+
+                        if (player != null && i != myNumber)
+                        {
+                            player.transform.position = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
+                        }
+
+                    }
+
+                }
                 break;
             case MessageType.SHOOT:
-                ServerShoot();
+                {
+                    ServerShoot();
+                }
                 break;
         }
         c.received.OnRead();
 
         // Client movement Lerp 
-        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+        //float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
         //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
-        serverPlayer.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+        //serverPlayer.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
 
     }
 
     public void ClientShoot()
     {
-        projectiles.Add(Instantiate(projectilePrefab, clientPlayer.transform.position, Quaternion.identity));
-        ShootMessage shoot = new ShootMessage();
-        c.ClientSend(shoot);
+        //projectiles.Add(Instantiate(projectilePrefab, clientPlayer.transform.position, Quaternion.identity));
+        //ShootMessage shoot = new ShootMessage();
+        //c.ClientSend(shoot);
     }
 
     public void ServerShoot()
     {
-        projectiles.Add(Instantiate(projectilePrefab, serverPlayer.transform.position, Quaternion.identity));
+        //projectiles.Add(Instantiate(projectilePrefab, serverPlayer.transform.position, Quaternion.identity));
     }
 
-    public void SendPosition()
+    public void SendPosition(GameObject player)
     {
-        // Debug.LogError("Sending position !");
-        clientMovement.type = MessageType.CLIENT;
-        clientMovement.x = clientPlayer.transform.position.x;
-        clientMovement.y = clientPlayer.transform.position.y;
+        //Debug.LogError("Sending position !");
+        clientMovement.type = MessageType.MOVEMENT;
+        clientMovement.x = player.transform.position.x;
+        clientMovement.y = player.transform.position.y;
+        clientMovement.playerId = myNumber;
 
         c.ClientSend(clientMovement);
     }
