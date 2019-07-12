@@ -10,7 +10,13 @@ public class Server : MonoBehaviour
     public GameObject projectilePrefab;
 
     private int nbOfPlayers;
-    private Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
+    private GameObject[] players = new GameObject[4];
+
+    // Receive movement of client
+    private Vector2[] startPlayersPositions = new Vector2[4];
+    private Vector2[] endPlayersPositions = new Vector2[4];
+    private float[] timesStartedLerping = new float[4];
+    private int lastClientMovement;
 
     private List<GameObject> projectiles = new List<GameObject>();
 
@@ -19,14 +25,9 @@ public class Server : MonoBehaviour
     public Button shootButton;
     private Vector3 speed = new Vector3();
 
-    // Receive movement of client
-    private int lastClientMovement = -1;
-    private Vector3 startClientPos;
-    private Vector3 endClientPos;
     // Send movement of server
     MovementMessage serverMovement = new MovementMessage();
 
-    private float timeStartedLerping;
     private float elapsed;
 
     UDPServer s = new UDPServer();
@@ -50,8 +51,6 @@ public class Server : MonoBehaviour
         }
     }
 
-    GameObject getPlayer;
-
     void Update()
     {
         switch (state)
@@ -67,8 +66,7 @@ public class Server : MonoBehaviour
                 speed = joystick.InputVector * Time.deltaTime * 5;
 
                 // Get server player
-                players.TryGetValue(0, out getPlayer);
-                getPlayer.transform.position += speed;
+                players[0].transform.position += speed;
 
 
                 elapsed += Time.deltaTime;
@@ -96,10 +94,10 @@ public class Server : MonoBehaviour
             case MessageType.MOVEMENT:
                 MovementMessage mm = (MovementMessage)s.received;
                 //Debug.Log("Movement from " + mm.playerId);
-                //startClientPos = clientPlayer.transform.position;
-                endClientPos = new Vector3(mm.x, mm.y);
                 lastClientMovement = mm.playerId;
-                //timeStartedLerping = Time.time;
+                startPlayersPositions[lastClientMovement] = players[lastClientMovement].transform.position;
+                endPlayersPositions[lastClientMovement] = new Vector3(mm.x, mm.y);
+                timesStartedLerping[lastClientMovement] = Time.time;
 
                 break;
             case MessageType.SHOOT:
@@ -109,42 +107,48 @@ public class Server : MonoBehaviour
         s.received.OnRead();
 
         // Server movement Lerp 
-        //float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-        //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
-        players.TryGetValue(lastClientMovement, out getPlayer);
-        if(getPlayer != null)
+        for(int i = 0; i < nbOfPlayers; i++)
         {
-            getPlayer.transform.position = endClientPos;
+            GameObject player = players[i];
+            Vector2 startClientPos = startPlayersPositions[i];
+            Vector2 endClientPos = endPlayersPositions[i];
+            float timeStartedLerping = timesStartedLerping[i];
+
+            if (i != 0)
+            {
+                float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
+                players[i].transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
+            }
         }
-        //clientPlayer.transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
 
     }
 
     public void AddPlayer()
     {
         Vector3 randomPosition = Random.insideUnitCircle;
-        
-        players.Add(nbOfPlayers, Instantiate(playerPrefab, randomPosition, Quaternion.identity));
-        nbOfPlayers++;
+
+        if (nbOfPlayers < 4)
+        {
+            players[nbOfPlayers] = Instantiate(playerPrefab, randomPosition, Quaternion.identity);
+            nbOfPlayers++;
+        }
     }
 
     public void SharePlayers()
     {
         ServerSharePlayersMessage newPlayerMessage = new ServerSharePlayersMessage();
 
-        newPlayerMessage.x = new float[players.Count];
-        newPlayerMessage.y = new float[players.Count];
+        newPlayerMessage.x = new float[nbOfPlayers];
+        newPlayerMessage.y = new float[nbOfPlayers];
 
-        newPlayerMessage.playerNumber = players.Count - 1;
+        newPlayerMessage.playerNumber = nbOfPlayers - 1;
 
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < nbOfPlayers; i++)
         {
-            GameObject player;
-            players.TryGetValue(i, out player);
-
-            if (player != null) {
-                newPlayerMessage.x[i] = player.transform.position.x;
-                newPlayerMessage.y[i] = player.transform.position.y;
+            if (players[i] != null) {
+                newPlayerMessage.x[i] = players[i].transform.position.x;
+                newPlayerMessage.y[i] = players[i].transform.position.y;
             }
         }
 
@@ -155,17 +159,13 @@ public class Server : MonoBehaviour
     {
         ServerShareMovementMessage shareMovementsMessage = new ServerShareMovementMessage();
 
-        shareMovementsMessage.x = new float[players.Count];
-        shareMovementsMessage.y = new float[players.Count];
+        shareMovementsMessage.x = new float[nbOfPlayers];
+        shareMovementsMessage.y = new float[nbOfPlayers];
 
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < nbOfPlayers; i++)
         {
-            GameObject player;
-            players.TryGetValue(i, out player);
-
-            shareMovementsMessage.x[i] = player.transform.position.x;
-            shareMovementsMessage.y[i] = player.transform.position.y;
-
+            shareMovementsMessage.x[i] = players[i].transform.position.x;
+            shareMovementsMessage.y[i] = players[i].transform.position.y;
         }
 
         s.ServerSend(shareMovementsMessage);

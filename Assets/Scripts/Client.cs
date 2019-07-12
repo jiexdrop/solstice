@@ -12,7 +12,10 @@ public class Client : MonoBehaviour
     private int nbOfPlayers;
     private int myNumber;
     private bool setNumber = false;
-    private Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
+    private GameObject [] players = new GameObject[4];
+    private Vector2 [] startPlayersPositions = new Vector2[4];
+    private Vector2 [] endPlayersPositions = new Vector2[4];
+    private float [] timesStartedLerping = new float[4];
 
     private List<GameObject> projectiles = new List<GameObject>();
 
@@ -27,7 +30,6 @@ public class Client : MonoBehaviour
     // Send movement of client
     MovementMessage clientMovement = new MovementMessage();
 
-    private float timeStartedLerping;
     private float elapsed;
 
     UDPClient c = new UDPClient();
@@ -72,22 +74,14 @@ public class Client : MonoBehaviour
             case GameState.GAME:
 
                 speed = joystick.InputVector * Time.deltaTime * 5;
-                GameObject player;
-                players.TryGetValue(myNumber, out player);
-                if (player != null)
-                {
-                    player.transform.position += speed;
-                }
+                players[myNumber].transform.position += speed;
 
                 elapsed += Time.deltaTime;
 
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    if (player != null)
-                    {
-                        SendPosition(player);
-                    }
+                    SendPosition(players[myNumber]); 
                 }
 
                 break;
@@ -114,45 +108,33 @@ public class Client : MonoBehaviour
                     // Destroy old players
                     for (int i = 0; i < nbOfPlayers; i++)
                     {
-                        GameObject player;
-                        players.TryGetValue(i, out player);
-                        if (player != null)
-                        {
-                            Destroy(player);
-                        }
+                        Destroy(players[i]);
+                        players[i] = null;
                     }
-                    players.Clear();
 
                     // Add new players
                     nbOfPlayers = sharePlayersMessage.x.Length;
 
                     for (int i = 0; i < nbOfPlayers; i++)
                     {
-                        players.Add(i, Instantiate(playerPrefab, new Vector2(sharePlayersMessage.x[i], sharePlayersMessage.y[i]), Quaternion.identity));
+                        players[i] = Instantiate(playerPrefab, new Vector2(sharePlayersMessage.x[i], sharePlayersMessage.y[i]), Quaternion.identity);
                     }
 
                     state = GameState.GAME;
                 }
                 break;
-            case MessageType.MOVEMENT:
-                {
-                    //MovementMessage mm = (MovementMessage)c.received;
-                    //startServerPos = serverPlayer.transform.position;
-                    //endServerPos = new Vector3(mm.x, mm.y);
-                    //timeStartedLerping = Time.time;
-                }
-                break;
             case MessageType.SERVER_SHARE_MOVEMENT:
                 {
                     ServerShareMovementMessage shareMovementsMessage = (ServerShareMovementMessage)c.received;
+
                     for (int i = 0; i < shareMovementsMessage.x.Length; i++)
                     {
-                        GameObject player;
-                        players.TryGetValue(i, out player);
 
-                        if (player != null && i != myNumber)
+                        if (i != myNumber)
                         {
-                            player.transform.position = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
+                            startPlayersPositions[i] = players[i].transform.position;
+                            endPlayersPositions[i] = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
+                            timesStartedLerping[i] = Time.time;
                         }
 
                     }
@@ -167,10 +149,21 @@ public class Client : MonoBehaviour
         }
         c.received.OnRead();
 
-        // Client movement Lerp 
-        //float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-        //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
-        //serverPlayer.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+        // Lerp server shared movements
+        for(int i = 0; i < nbOfPlayers; i++)
+        {
+            GameObject player = players[i];
+            Vector2 startServerPos = startPlayersPositions[i];
+            Vector2 endServerPos = endPlayersPositions[i];
+            float timeStartedLerping = timesStartedLerping[i];
+
+            if (i != myNumber)
+            {
+                float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                player.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+            }
+        }
+
 
     }
 
