@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     public ConnectionType type = ConnectionType.UNDEFINED;
 
-    public const float FREQUENCY = 1f / 5f;
+    public const float FREQUENCY = 1f / 10f;
     public const int PACKET_LENGTH = 512;
     public const int PORT = 7345;
 

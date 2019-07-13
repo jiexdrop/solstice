@@ -101,7 +101,10 @@ public class Server : MonoBehaviour
 
                 break;
             case MessageType.SHOOT:
-                ClientShoot();
+                ShootMessage sm = (ShootMessage)s.received;
+                ClientShoot(sm.playerId);
+                ShareShoots(sm.playerId);
+                elapsed = 0; // Interrupt ShareMovements to send new player
                 break;
         }
         s.received.OnRead();
@@ -142,7 +145,7 @@ public class Server : MonoBehaviour
         newPlayerMessage.x = new float[nbOfPlayers];
         newPlayerMessage.y = new float[nbOfPlayers];
 
-        newPlayerMessage.playerNumber = nbOfPlayers - 1;
+        newPlayerMessage.playerId = nbOfPlayers - 1;
 
         for (int i = 0; i < nbOfPlayers; i++)
         {
@@ -173,14 +176,20 @@ public class Server : MonoBehaviour
 
     public void ServerShoot()
     {
-        //projectiles.Add(Instantiate(projectilePrefab, serverPlayer.transform.position, Quaternion.identity));
-        //ShootMessage shoot = new ShootMessage();
-        //s.ServerSend(shoot);
+        projectiles.Add(Instantiate(projectilePrefab, players[0].transform.position, Quaternion.identity));
+        ShareShoots(0);
     }
 
-    public void ClientShoot()
+    public void ClientShoot(int playerId)
     {
-        //projectiles.Add(Instantiate(projectilePrefab, clientPlayer.transform.position, Quaternion.identity));
+        projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
+    }
+
+    public void ShareShoots(int playerId)
+    {
+        ServerShareShootMessage shoot = new ServerShareShootMessage();
+        shoot.playerId = playerId;
+        s.ServerSend(shoot);
     }
 
 }

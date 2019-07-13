@@ -10,8 +10,8 @@ public class Client : MonoBehaviour
     public GameObject projectilePrefab;
 
     private int nbOfPlayers;
-    private int myNumber;
-    private bool setNumber = false;
+    private int playerId;
+    private bool setPlayerId = false;
     private GameObject [] players = new GameObject[4];
     private Vector2 [] startPlayersPositions = new Vector2[4];
     private Vector2 [] endPlayersPositions = new Vector2[4];
@@ -74,14 +74,14 @@ public class Client : MonoBehaviour
             case GameState.GAME:
 
                 speed = joystick.InputVector * Time.deltaTime * 5;
-                players[myNumber].transform.position += speed;
+                players[playerId].transform.position += speed;
 
                 elapsed += Time.deltaTime;
 
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    SendPosition(players[myNumber]); 
+                    SendPosition(players[playerId]); 
                 }
 
                 break;
@@ -99,10 +99,10 @@ public class Client : MonoBehaviour
                     ServerSharePlayersMessage sharePlayersMessage = (ServerSharePlayersMessage)c.received;
 
                     // The firt message sets the player number 
-                    if (!setNumber)
+                    if (!setPlayerId)
                     {
-                        myNumber = sharePlayersMessage.playerNumber;
-                        setNumber = true;
+                        playerId = sharePlayersMessage.playerId;
+                        setPlayerId = true;
                     }
 
                     // Destroy old players
@@ -130,7 +130,7 @@ public class Client : MonoBehaviour
                     for (int i = 0; i < shareMovementsMessage.x.Length; i++)
                     {
 
-                        if (i != myNumber)
+                        if (i != playerId)
                         {
                             startPlayersPositions[i] = players[i].transform.position;
                             endPlayersPositions[i] = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
@@ -141,9 +141,10 @@ public class Client : MonoBehaviour
 
                 }
                 break;
-            case MessageType.SHOOT:
+            case MessageType.SERVER_SHARE_SHOOT:
                 {
-                    ServerShoot();
+                    ServerShareShootMessage ssm = (ServerShareShootMessage)c.received;
+                    ServerShoot(ssm.playerId);
                 }
                 break;
         }
@@ -157,7 +158,7 @@ public class Client : MonoBehaviour
             Vector2 endServerPos = endPlayersPositions[i];
             float timeStartedLerping = timesStartedLerping[i];
 
-            if (i != myNumber)
+            if (i != playerId)
             {
                 float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
                 player.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
@@ -169,14 +170,15 @@ public class Client : MonoBehaviour
 
     public void ClientShoot()
     {
-        //projectiles.Add(Instantiate(projectilePrefab, clientPlayer.transform.position, Quaternion.identity));
-        //ShootMessage shoot = new ShootMessage();
-        //c.ClientSend(shoot);
+        projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
+        ShootMessage shoot = new ShootMessage();
+        shoot.playerId = playerId;
+        c.ClientSend(shoot);
     }
 
-    public void ServerShoot()
+    public void ServerShoot(int playerId)
     {
-        //projectiles.Add(Instantiate(projectilePrefab, serverPlayer.transform.position, Quaternion.identity));
+        projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
     }
 
     public void SendPosition(GameObject player)
@@ -185,7 +187,7 @@ public class Client : MonoBehaviour
         clientMovement.type = MessageType.MOVEMENT;
         clientMovement.x = player.transform.position.x;
         clientMovement.y = player.transform.position.y;
-        clientMovement.playerId = myNumber;
+        clientMovement.playerId = playerId;
 
         c.ClientSend(clientMovement);
     }

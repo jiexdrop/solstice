@@ -8,9 +8,12 @@ public enum MessageType
 
     CLIENT_NEW_PLAYER,
     SERVER_SHARE_PLAYERS,
-    SERVER_SHARE_MOVEMENT,
-    SHOOT,
+
     MOVEMENT,
+    SERVER_SHARE_MOVEMENT,
+    
+    SHOOT,
+    SERVER_SHARE_SHOOT,
 }
 
 public enum GameState
@@ -53,7 +56,7 @@ public class ServerSharePlayersMessage : Message
     public float[] x;
     public float[] y;
 
-    public int playerNumber;
+    public int playerId;
 
     public ServerSharePlayersMessage()
     {
@@ -88,8 +91,22 @@ public class ClientNewPlayerMessage : Message
 [System.Serializable]
 public class ShootMessage : Message
 {
+    public int playerId;
+
     public ShootMessage()
     {
         type = MessageType.SHOOT;
     }
 }
+
+[System.Serializable]
+public class ServerShareShootMessage : Message
+{
+    public int playerId;
+
+    public ServerShareShootMessage()
+    {
+        type = MessageType.SERVER_SHARE_SHOOT;
+    }
+}
+
