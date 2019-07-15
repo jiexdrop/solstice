@@ -32,6 +32,8 @@ public class Server : MonoBehaviour
 
     UDPServer s = new UDPServer();
 
+    Queue<Message> messages = new Queue<Message>();
+
     private GameState state = GameState.STOP;
 
     void Start()
@@ -75,6 +77,10 @@ public class Server : MonoBehaviour
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
                     ShareMovements();
+                    if(messages.Count > 0)
+                    {
+                        s.ServerSend(messages.Dequeue());
+                    }
                 }
 
                 break;
@@ -89,7 +95,6 @@ public class Server : MonoBehaviour
                 Debug.LogError("Recieved Start Server from client");
                 AddPlayer();
                 SharePlayers();
-                elapsed = 0; // Interrupt ShareMovements to send new player
                 break;
             case MessageType.MOVEMENT:
                 MovementMessage mm = (MovementMessage)s.received;
@@ -104,7 +109,6 @@ public class Server : MonoBehaviour
                 ShootMessage sm = (ShootMessage)s.received;
                 ClientShoot(sm.playerId);
                 ShareShoots(sm.playerId);
-                elapsed = 0; // Interrupt ShareMovements to send new player
                 break;
         }
         s.received.OnRead();
@@ -120,7 +124,7 @@ public class Server : MonoBehaviour
             if (i != 0)
             {
                 float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-                //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, frequency));
+                Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, GameManager.FREQUENCY));
                 players[i].transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
             }
         }
@@ -155,7 +159,7 @@ public class Server : MonoBehaviour
             }
         }
 
-        s.ServerSend(newPlayerMessage);
+        messages.Enqueue(newPlayerMessage);
     }
 
     public void ShareMovements()
@@ -171,7 +175,7 @@ public class Server : MonoBehaviour
             shareMovementsMessage.y[i] = players[i].transform.position.y;
         }
 
-        s.ServerSend(shareMovementsMessage);
+        messages.Enqueue(shareMovementsMessage);
     }
 
     public void ServerShoot()
@@ -189,7 +193,7 @@ public class Server : MonoBehaviour
     {
         ServerShareShootMessage shoot = new ServerShareShootMessage();
         shoot.playerId = playerId;
-        s.ServerSend(shoot);
+        messages.Enqueue(shoot);
     }
 
 }

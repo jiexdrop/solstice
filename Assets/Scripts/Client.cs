@@ -34,6 +34,8 @@ public class Client : MonoBehaviour
 
     UDPClient c = new UDPClient();
 
+    Queue<Message> messages = new Queue<Message>();
+
     private GameState state = GameState.STOP;
 
     void Start()
@@ -81,7 +83,11 @@ public class Client : MonoBehaviour
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    SendPosition(players[playerId]); 
+                    SendPosition(players[playerId]);
+                    if (messages.Count > 0)
+                    {
+                        c.ClientSend(messages.Dequeue());
+                    }
                 }
 
                 break;
@@ -173,7 +179,7 @@ public class Client : MonoBehaviour
         projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
         ShootMessage shoot = new ShootMessage();
         shoot.playerId = playerId;
-        c.ClientSend(shoot);
+        messages.Enqueue(shoot);
     }
 
     public void ServerShoot(int playerId)
@@ -189,6 +195,6 @@ public class Client : MonoBehaviour
         clientMovement.y = player.transform.position.y;
         clientMovement.playerId = playerId;
 
-        c.ClientSend(clientMovement);
+        messages.Enqueue(clientMovement);
     }
 }

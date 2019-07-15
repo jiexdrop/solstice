@@ -51,7 +51,10 @@ public class UDPServer
       
             received = (Message)formatter.Deserialize(ms);
 
-            epClients.Add(remoteEP);
+            if (!epClients.Contains(remoteEP))
+            {
+                epClients.Add(remoteEP);
+            }
         }
     }
 }
