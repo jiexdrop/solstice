@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Server : MonoBehaviour
 {
@@ -35,6 +37,11 @@ public class Server : MonoBehaviour
 
     private GameState state = GameState.STOP;
 
+    [Header("Lobby")]
+    public PlayerPanel[] playerPanels;
+    public Button playButton;
+    public PanelsManager panelsManager;
+
     void Start()
     {
         if (GameManager.Instance.type.Equals(ConnectionType.SERVER))
@@ -44,6 +51,9 @@ public class Server : MonoBehaviour
             AddPlayer();
 
             shootButton.onClick.AddListener(ServerShoot);
+
+            playButton.onClick.AddListener(StartGame);
+
         }
         else
         {
@@ -52,12 +62,20 @@ public class Server : MonoBehaviour
         }
     }
 
+    private void StartGame()
+    {
+        panelsManager.ShowGamePanel();
+        state = GameState.GAME;
+        ServerStartGameMessage ssgm = new ServerStartGameMessage();
+        s.ServerSend(ssgm);
+    }
+
     void Update()
     {
         switch (state)
         {
             case GameState.STOP:
-                state = GameState.GAME;
+                
                 break;
             case GameState.START:
 
@@ -137,6 +155,8 @@ public class Server : MonoBehaviour
         if (nbOfPlayers < 4)
         {
             players[nbOfPlayers] = Instantiate(playerPrefab, randomPosition, Quaternion.identity);
+            // Lobby
+            playerPanels[nbOfPlayers].SetActivePlayer(true);
             nbOfPlayers++;
         }
 

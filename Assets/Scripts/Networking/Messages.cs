@@ -6,6 +6,8 @@ public enum MessageType
 {
     NONE,
 
+    SERVER_START_GAME,
+
     CLIENT_NEW_PLAYER,
     SERVER_SHARE_PLAYERS,
 
@@ -14,6 +16,7 @@ public enum MessageType
     
     SHOOT,
     SERVER_SHARE_SHOOT,
+
 }
 
 public enum GameState
@@ -109,6 +112,17 @@ public class ServerShareShootMessage : Message
     public ServerShareShootMessage()
     {
         type = MessageType.SERVER_SHARE_SHOOT;
+    }
+}
+
+[System.Serializable]
+public class ServerStartGameMessage : Message
+{
+    public int playerId;
+
+    public ServerStartGameMessage()
+    {
+        type = MessageType.SERVER_START_GAME;
     }
 }
 

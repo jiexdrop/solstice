@@ -25,8 +25,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject playerPrefab;
 
-    [SerializeField]
-    private InputField clientConnectIp;
+    public InputField clientConnectIp;
 
     public ConnectionType type = ConnectionType.UNDEFINED;
 

@@ -37,6 +37,11 @@ public class Client : MonoBehaviour
 
     private GameState state = GameState.STOP;
 
+    [Header("Lobby")]
+    public PlayerPanel[] playerPanels;
+    public Button playButton;
+    public PanelsManager panelsManager;
+
     void Start()
     {
         if (GameManager.Instance.type.Equals(ConnectionType.CLIENT))
@@ -45,6 +50,7 @@ public class Client : MonoBehaviour
             c.Client(GameManager.Instance.IP);
 
             shootButton.onClick.AddListener(ClientShoot);
+            playButton.gameObject.SetActive(false);
         }
         else
         {
@@ -99,6 +105,10 @@ public class Client : MonoBehaviour
         {
             case MessageType.NONE:
                 break;
+            case MessageType.SERVER_START_GAME:
+                panelsManager.ShowGamePanel();
+                state = GameState.GAME;
+                break;
             case MessageType.SERVER_SHARE_PLAYERS:
                 {
                     ServerSharePlayersMessage sharePlayersMessage = (ServerSharePlayersMessage)c.received;
@@ -124,11 +134,11 @@ public class Client : MonoBehaviour
                     for (int i = 0; i < nbOfPlayers; i++)
                     {
                         players[i] = Instantiate(playerPrefab, new Vector2(sharePlayersMessage.x[i], sharePlayersMessage.y[i]), Quaternion.identity);
+                        // Lobby
+                        playerPanels[i].SetActivePlayer(true);
                     }
 
                     player = players[playerId].GetComponent<Player>();
-
-                    state = GameState.GAME;
                 }
                 break;
             case MessageType.SERVER_SHARE_MOVEMENT:
