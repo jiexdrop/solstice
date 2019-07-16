@@ -16,6 +16,8 @@ public class Client : MonoBehaviour
     private Player player;
     private Vector2 [] startPlayersPositions = new Vector2[4];
     private Vector2 [] endPlayersPositions = new Vector2[4];
+    private float [] startPlayersRotations = new float[4];
+    private float [] endPlayersRotations = new float[4];
     private float [] timesStartedLerping = new float[4];
 
     private List<GameObject> projectiles = new List<GameObject>();
@@ -95,6 +97,27 @@ public class Client : MonoBehaviour
                     SendPosition(player.gameObject);
                 }
 
+                // Lerp server shared movements
+                for (int i = 0; i < nbOfPlayers; i++)
+                {
+                    GameObject player = players[i];
+                    Vector2 startServerPos = startPlayersPositions[i];
+                    Vector2 endServerPos = endPlayersPositions[i];
+                    float startServerRot = startPlayersRotations[i];
+                    float endServerRot = endPlayersRotations[i];
+                    float timeStartedLerping = timesStartedLerping[i];
+
+                    if (i != playerId)
+                    {
+                        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                        // Position
+                        player.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+                        // Rotation of the visor
+                        float lerpedRotation = Mathf.LerpAngle(startServerRot, endServerRot, lerpPercentage);
+                        players[i].GetComponent<Player>().SetRotation(lerpedRotation);
+                    }
+                }
+
                 break;
         }
 
@@ -151,7 +174,8 @@ public class Client : MonoBehaviour
                         if (i != playerId)
                         {
                             startPlayersPositions[i] = players[i].transform.position;
-                            players[i].GetComponent<Player>().SetRotation(shareMovementsMessage.visorRotation[i]);
+                            startPlayersRotations[i] = players[i].GetComponent<Player>().visorRotation;
+                            endPlayersRotations[i] = shareMovementsMessage.visorRotation[i];
                             endPlayersPositions[i] = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
                             timesStartedLerping[i] = Time.time;
                         }
@@ -171,22 +195,6 @@ public class Client : MonoBehaviour
                 break;
         }
         c.received.OnRead();
-
-        // Lerp server shared movements
-        for(int i = 0; i < nbOfPlayers; i++)
-        {
-            GameObject player = players[i];
-            Vector2 startServerPos = startPlayersPositions[i];
-            Vector2 endServerPos = endPlayersPositions[i];
-            float timeStartedLerping = timesStartedLerping[i];
-
-            if (i != playerId)
-            {
-                float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-                player.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
-            }
-        }
-
 
     }
 

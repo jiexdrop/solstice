@@ -18,6 +18,8 @@ public class Server : MonoBehaviour
     // Receive movement of client
     private Vector2[] startPlayersPositions = new Vector2[4];
     private Vector2[] endPlayersPositions = new Vector2[4];
+    private float[] startPlayersRotations = new float[4];
+    private float[] endPlayersRotations = new float[4];
     private float[] timesStartedLerping = new float[4];
     private int lastClientMovement;
 
@@ -99,6 +101,26 @@ public class Server : MonoBehaviour
                     ShareMovements();
                 }
 
+                // Server movement Lerp 
+                for (int i = 0; i < nbOfPlayers; i++)
+                {
+                    GameObject player = players[i];
+                    Vector2 startClientPos = startPlayersPositions[i];
+                    Vector2 endClientPos = endPlayersPositions[i];
+                    float startClientRot = startPlayersRotations[i];
+                    float endClientRot = endPlayersRotations[i];
+                    float timeStartedLerping = timesStartedLerping[i];
+
+                    if (i != 0)
+                    {
+                        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                        //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, GameManager.FREQUENCY));
+                        players[i].transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
+                        float lerpedRotation = Mathf.LerpAngle(startClientRot, endClientRot, lerpPercentage);
+                        players[i].GetComponent<Player>().SetRotation(lerpedRotation);
+                    }
+                }
+
                 break;
         }
 
@@ -117,10 +139,11 @@ public class Server : MonoBehaviour
                 //Debug.Log("Movement from " + mm.playerId);
                 lastClientMovement = mm.playerId;
                 startPlayersPositions[lastClientMovement] = players[lastClientMovement].transform.position;
+                startPlayersRotations[lastClientMovement] = players[lastClientMovement].GetComponent<Player>().visorRotation;
+                endPlayersRotations[lastClientMovement] = mm.visorRotation;
                 endPlayersPositions[lastClientMovement] = new Vector3(mm.x, mm.y);
-                timesStartedLerping[lastClientMovement] = Time.time;
-                players[lastClientMovement].GetComponent<Player>().SetRotation(mm.visorRotation);
 
+                timesStartedLerping[lastClientMovement] = Time.time;
                 break;
             case MessageType.SHOOT:
                 ShootMessage sm = (ShootMessage)s.received;
@@ -130,21 +153,6 @@ public class Server : MonoBehaviour
         }
         s.received.OnRead();
 
-        // Server movement Lerp 
-        for(int i = 0; i < nbOfPlayers; i++)
-        {
-            GameObject player = players[i];
-            Vector2 startClientPos = startPlayersPositions[i];
-            Vector2 endClientPos = endPlayersPositions[i];
-            float timeStartedLerping = timesStartedLerping[i];
-
-            if (i != 0)
-            {
-                float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-                //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, GameManager.FREQUENCY));
-                players[i].transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
-            }
-        }
 
     }
 
