@@ -47,6 +47,7 @@ public class MovementMessage : Message
     public int playerId;
     public float x;
     public float y;
+    public float visorRotation;
 }
 
 [System.Serializable]
@@ -70,7 +71,7 @@ public class ServerShareMovementMessage : Message
 {
     public float [] x;
     public float [] y;
-
+    public float [] visorRotation;
 
     public ServerShareMovementMessage()
     {
@@ -92,6 +93,7 @@ public class ClientNewPlayerMessage : Message
 public class ShootMessage : Message
 {
     public int playerId;
+    public float duration;
 
     public ShootMessage()
     {

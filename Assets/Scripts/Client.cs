@@ -13,6 +13,7 @@ public class Client : MonoBehaviour
     private int playerId;
     private bool setPlayerId = false;
     private GameObject [] players = new GameObject[4];
+    private Player player;
     private Vector2 [] startPlayersPositions = new Vector2[4];
     private Vector2 [] endPlayersPositions = new Vector2[4];
     private float [] timesStartedLerping = new float[4];
@@ -33,8 +34,6 @@ public class Client : MonoBehaviour
     private float elapsed;
 
     UDPClient c = new UDPClient();
-
-    Queue<Message> messages = new Queue<Message>();
 
     private GameState state = GameState.STOP;
 
@@ -76,18 +75,18 @@ public class Client : MonoBehaviour
             case GameState.GAME:
 
                 speed = joystick.InputVector * Time.deltaTime * 5;
-                players[playerId].transform.position += speed;
+                if (speed.magnitude > 0)
+                {
+                    player.transform.position += speed;
+                    player.SetRotation(joystick.InputVector);
+                }
 
                 elapsed += Time.deltaTime;
 
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    SendPosition(players[playerId]);
-                    if (messages.Count > 0)
-                    {
-                        c.ClientSend(messages.Dequeue());
-                    }
+                    SendPosition(player.gameObject);
                 }
 
                 break;
@@ -104,12 +103,13 @@ public class Client : MonoBehaviour
                 {
                     ServerSharePlayersMessage sharePlayersMessage = (ServerSharePlayersMessage)c.received;
 
-                    // The firt message sets the player number 
+                    // The first message sets the player number 
                     if (!setPlayerId)
                     {
                         playerId = sharePlayersMessage.playerId;
                         setPlayerId = true;
                     }
+
 
                     // Destroy old players
                     for (int i = 0; i < nbOfPlayers; i++)
@@ -126,6 +126,8 @@ public class Client : MonoBehaviour
                         players[i] = Instantiate(playerPrefab, new Vector2(sharePlayersMessage.x[i], sharePlayersMessage.y[i]), Quaternion.identity);
                     }
 
+                    player = players[playerId].GetComponent<Player>();
+
                     state = GameState.GAME;
                 }
                 break;
@@ -139,6 +141,7 @@ public class Client : MonoBehaviour
                         if (i != playerId)
                         {
                             startPlayersPositions[i] = players[i].transform.position;
+                            players[i].GetComponent<Player>().SetRotation(shareMovementsMessage.visorRotation[i]);
                             endPlayersPositions[i] = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
                             timesStartedLerping[i] = Time.time;
                         }
@@ -150,7 +153,10 @@ public class Client : MonoBehaviour
             case MessageType.SERVER_SHARE_SHOOT:
                 {
                     ServerShareShootMessage ssm = (ServerShareShootMessage)c.received;
-                    ServerShoot(ssm.playerId);
+                    if (ssm.playerId != playerId)
+                    {
+                        ServerShoot(ssm.playerId);
+                    }
                 }
                 break;
         }
@@ -176,15 +182,25 @@ public class Client : MonoBehaviour
 
     public void ClientShoot()
     {
-        projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
+        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+        Projectile projectile = p.GetComponent<Projectile>();
+        projectile.duration = GameManager.SHOOT_DURATION;
+        projectile.transform.rotation = player.center.transform.rotation;
+        projectiles.Add(p);
+
         ShootMessage shoot = new ShootMessage();
         shoot.playerId = playerId;
-        messages.Enqueue(shoot);
+        shoot.duration = GameManager.SHOOT_DURATION;
+        c.ClientSend(shoot);
     }
 
     public void ServerShoot(int playerId)
     {
-        projectiles.Add(Instantiate(projectilePrefab, players[playerId].transform.position, Quaternion.identity));
+        GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
+        Projectile projectile = p.GetComponent<Projectile>();
+        projectile.duration = GameManager.SHOOT_DURATION;
+        projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
+        projectiles.Add(p);
     }
 
     public void SendPosition(GameObject player)
@@ -193,8 +209,9 @@ public class Client : MonoBehaviour
         clientMovement.type = MessageType.MOVEMENT;
         clientMovement.x = player.transform.position.x;
         clientMovement.y = player.transform.position.y;
+        clientMovement.visorRotation = player.GetComponent<Player>().visorRotation;
         clientMovement.playerId = playerId;
 
-        messages.Enqueue(clientMovement);
+        c.ClientSend(clientMovement);
     }
 }
