@@ -25,8 +25,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject playerPrefab;
 
-    public InputField clientConnectIp;
-
     public ConnectionType type = ConnectionType.UNDEFINED;
 
     public const float FREQUENCY = 1f / 10f;
@@ -47,17 +45,16 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void CreateClientGameScene()
+    public void CreateClientGameScene(string ip)
     {
         SceneManager.LoadScene(Scenes.GAME_SCENE);
-        IP = clientConnectIp.text;
+        IP = ip;
         type = ConnectionType.CLIENT;
     }
 
     public void CreateServerGameScene()
     {
         SceneManager.LoadScene(Scenes.GAME_SCENE);
-        IP = clientConnectIp.text;
         type = ConnectionType.SERVER;
     }
 }

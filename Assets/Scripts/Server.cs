@@ -36,6 +36,7 @@ public class Server : MonoBehaviour
     private float elapsed;
 
     UDPServer s = new UDPServer();
+    TCPServer os = new TCPServer();
 
     private GameState state = GameState.STOP;
 
@@ -49,6 +50,7 @@ public class Server : MonoBehaviour
         if (GameManager.Instance.type.Equals(ConnectionType.SERVER))
         {
             s.Server(GameManager.Instance.IP);
+            os.Server(GameManager.Instance.IP);
 
             AddPlayer();
 
@@ -56,6 +58,7 @@ public class Server : MonoBehaviour
 
             playButton.onClick.AddListener(StartGame);
 
+            panelsManager.ShowLobbyPanel();
         }
         else
         {

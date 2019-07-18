@@ -2282,6 +2282,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beb94475ee6551148b77fd48a902b497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lobbyPanel: {fileID: 1523021904}
+  gamePanel: {fileID: 2064457781}
 --- !u!1 &1278975126
 GameObject:
   m_ObjectHideFlags: 0

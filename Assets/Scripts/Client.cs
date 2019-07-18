@@ -52,7 +52,10 @@ public class Client : MonoBehaviour
             c.Client(GameManager.Instance.IP);
 
             shootButton.onClick.AddListener(ClientShoot);
+
             playButton.gameObject.SetActive(false);
+
+            panelsManager.ShowLobbyPanel();
         }
         else
         {

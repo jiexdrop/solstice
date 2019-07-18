@@ -4,14 +4,8 @@ using UnityEngine;
 
 public class PanelsManager : MonoBehaviour
 {
-    private GameObject lobbyPanel;
-    private GameObject gamePanel;
-
-    void Start()
-    {
-        lobbyPanel = transform.GetChild(0).gameObject;
-        gamePanel = transform.GetChild(1).gameObject;
-    }
+    public GameObject lobbyPanel;
+    public GameObject gamePanel;
 
     public void ShowGamePanel()
     {
