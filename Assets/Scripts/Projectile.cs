@@ -19,7 +19,7 @@ public class Projectile : MonoBehaviour
         elapsed += Time.deltaTime;
 
         // transform.right = transform.forward for 2D
-        transform.position += transform.right * Time.deltaTime * 5; 
+        transform.position += transform.right * Time.deltaTime * 12; 
 
         if(elapsed > duration)
         {

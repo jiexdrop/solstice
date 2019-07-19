@@ -44,6 +44,10 @@ public class Client : MonoBehaviour
     public Button playButton;
     public PanelsManager panelsManager;
 
+    [Header("Generation")]
+    public DungeonGeneration dungeonGeneration;
+    public int seed;
+
     void Start()
     {
         if (GameManager.Instance.type.Equals(ConnectionType.CLIENT))
@@ -56,6 +60,7 @@ public class Client : MonoBehaviour
             playButton.gameObject.SetActive(false);
 
             panelsManager.ShowLobbyPanel();
+
         }
         else
         {
@@ -85,7 +90,7 @@ public class Client : MonoBehaviour
                 break;
             case GameState.GAME:
 
-                speed = joystick.InputVector * Time.deltaTime * 5;
+                speed = joystick.InputVector * Time.deltaTime * 12;
                 if (speed.magnitude > 0)
                 {
                     //player.transform.position += speed;
@@ -146,6 +151,9 @@ public class Client : MonoBehaviour
                     {
                         playerId = sharePlayersMessage.playerId;
                         setPlayerId = true;
+
+                        seed = sharePlayersMessage.seed;
+                        dungeonGeneration.Generate(seed);
                     }
 
 
@@ -169,6 +177,7 @@ public class Client : MonoBehaviour
                     player = players[playerId].GetComponent<Player>();
                     // Set camera as a child of the player
                     Camera.main.transform.parent = player.transform;
+
                 }
                 break;
             case MessageType.SERVER_SHARE_MOVEMENT:

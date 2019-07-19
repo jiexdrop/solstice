@@ -96,7 +96,7 @@ public class Server : MonoBehaviour
                 break;
             case GameState.GAME:
                 
-                speed = joystick.InputVector * Time.deltaTime * 5;
+                speed = joystick.InputVector * Time.deltaTime * 12;
 
                 // Get server player
                 if (speed.magnitude > 0)
@@ -198,6 +198,8 @@ public class Server : MonoBehaviour
         newPlayerMessage.y = new float[nbOfPlayers];
 
         newPlayerMessage.playerId = nbOfPlayers - 1;
+
+        newPlayerMessage.seed = seed;
 
         for (int i = 0; i < nbOfPlayers; i++)
         {

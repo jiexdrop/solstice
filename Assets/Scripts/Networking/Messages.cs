@@ -61,6 +61,8 @@ public class ServerSharePlayersMessage : Message
 
     public int playerId;
 
+    public int seed;
+
     public ServerSharePlayersMessage()
     {
         type = MessageType.SERVER_SHARE_PLAYERS;
