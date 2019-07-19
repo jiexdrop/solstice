@@ -9,6 +9,7 @@ TextureImporter:
     21300008: Tilemap_4
     21300010: Tilemap_5
     21300012: Tilemap_6
+    21300014: Tilemap_7
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -116,7 +117,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2eed12118021a4846a2592f7e275a6f4
+      spriteID: 8091d427c015ffa49a5962e382d8013c
       vertices: []
       indices: 
       edges: []
@@ -136,7 +137,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1b0a338dab3128946b9044de15050470
+      spriteID: a1d7afb66b1648e43b3f851aeea9645b
       vertices: []
       indices: 
       edges: []
@@ -156,7 +157,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 138a40d1b1c9b3b4a8d951325244d5d5
+      spriteID: 2db1b1de68c5962448b5d2ca5d350412
       vertices: []
       indices: 
       edges: []
@@ -176,7 +177,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7640705d80a41a243881aadd224ca7cf
+      spriteID: 30125bd704d1dd740b039fa06449e19e
       vertices: []
       indices: 
       edges: []
@@ -196,7 +197,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8499cc660d767d44cb9a246c1841192d
+      spriteID: 95d4b20c94cc0d84d8e4f6dc41da82ef
       vertices: []
       indices: 
       edges: []
@@ -216,7 +217,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 181b8bc57ef6c60479d6bf1987c8822f
+      spriteID: 319080f2a86a01e44abd47f6bea2e1bc
       vertices: []
       indices: 
       edges: []
@@ -236,7 +237,27 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9b8dc207664375543a3ba5c51abfa93e
+      spriteID: aed88840199749f4e9d49863a6a8d03a
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilemap_7
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dba65bf7d84018a43825fb7eda28cfca
       vertices: []
       indices: 
       edges: []

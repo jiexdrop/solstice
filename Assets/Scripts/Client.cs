@@ -25,7 +25,7 @@ public class Client : MonoBehaviour
     [Header("Controls")]
     public VirtualJoystick joystick;
     public Button shootButton;
-    private Vector3 speed = new Vector3();
+    private Vector2 speed = new Vector2();
 
     // Receive movement of server
     private Vector3 startServerPos;
@@ -88,7 +88,9 @@ public class Client : MonoBehaviour
                 speed = joystick.InputVector * Time.deltaTime * 5;
                 if (speed.magnitude > 0)
                 {
-                    player.transform.position += speed;
+                    //player.transform.position += speed;
+                    Rigidbody2D playerRb2D = player.GetComponent<Rigidbody2D>();
+                    playerRb2D.MovePosition(playerRb2D.position + speed);
                     player.SetRotation(joystick.InputVector);
                 }
 
@@ -165,6 +167,8 @@ public class Client : MonoBehaviour
                     }
 
                     player = players[playerId].GetComponent<Player>();
+                    // Set camera as a child of the player
+                    Camera.main.transform.parent = player.transform;
                 }
                 break;
             case MessageType.SERVER_SHARE_MOVEMENT:

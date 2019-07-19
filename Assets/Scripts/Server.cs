@@ -28,14 +28,16 @@ public class Server : MonoBehaviour
     [Header("Controls")]
     public VirtualJoystick joystick;
     public Button shootButton;
-    private Vector3 speed = new Vector3();
+    private Vector2 speed = new Vector2();
 
     // Send movement of server
     MovementMessage serverMovement = new MovementMessage();
 
     private float elapsed;
 
+    // This server shares movement data
     UDPServer s = new UDPServer();
+    // This server is used for network ip address/port scan
     TCPServer os = new TCPServer();
 
     private GameState state = GameState.STOP;
@@ -44,6 +46,10 @@ public class Server : MonoBehaviour
     public PlayerPanel[] playerPanels;
     public Button playButton;
     public PanelsManager panelsManager;
+
+    [Header("Generation")]
+    public DungeonGeneration dungeonGeneration;
+    public int seed;
 
     void Start()
     {
@@ -59,6 +65,9 @@ public class Server : MonoBehaviour
             playButton.onClick.AddListener(StartGame);
 
             panelsManager.ShowLobbyPanel();
+
+            seed = Random.Range(0, Int32.MaxValue);
+            dungeonGeneration.Generate(seed);
         }
         else
         {
@@ -92,7 +101,9 @@ public class Server : MonoBehaviour
                 // Get server player
                 if (speed.magnitude > 0)
                 {
-                    player.transform.position += speed;
+                    //player.transform.position += speed;
+                    Rigidbody2D playerRb2D = player.GetComponent<Rigidbody2D>();
+                    playerRb2D.MovePosition(playerRb2D.position + speed);
                     player.SetRotation(joystick.InputVector);
                 }
 
@@ -174,6 +185,8 @@ public class Server : MonoBehaviour
         if (player == null) // Set server player 
         {
             player = players[0].GetComponent<Player>();
+            // Set camera as a child of the player
+            Camera.main.transform.parent = player.transform;
         }
     }
 

@@ -6,8 +6,6 @@ public enum MessageType
 {
     NONE,
 
-    SERVER_RUNNING,
-
     SERVER_START_GAME,
 
     CLIENT_NEW_PLAYER,
@@ -127,13 +125,3 @@ public class ServerStartGameMessage : Message
     }
 }
 
-[System.Serializable]
-public class ServerRunningMessage : Message
-{
-    string serverName = "Solstice Server";
-
-    public ServerRunningMessage()
-    {
-        type = MessageType.SERVER_RUNNING;
-    }
-}

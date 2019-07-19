@@ -106,7 +106,7 @@ public class AddressesManager : MonoBehaviour
                 }
                 catch (SocketException ex)
                 {
-                    //Debug.Log($"Failed @{address} Error code: {ex.ErrorCode}");
+                    Debug.Log($"Failed with error code: {ex.ErrorCode}");
                 }
             }
         });
