@@ -21,9 +21,21 @@ public class AddressesManager : MonoBehaviour
 
     private float elapsed = 6f;
 
+    private string startAddress;
+
     public void Start()
     {
-    
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                startAddress = ip.ToString();
+            }
+        }
+        int index = startAddress.LastIndexOf('.');
+        startAddress = startAddress.Substring(0, index+1);
+        //Debug.Log(startAddress);
     }
 
     IEnumerator ScanNetworkCoroutine()
@@ -82,7 +94,7 @@ public class AddressesManager : MonoBehaviour
     {
         Parallel.For(0, 254, async i =>
         {
-            string address = GetAddress("192.168.1.", i);
+            string address = GetAddress(startAddress, i);
 
             using (TcpClient client = new TcpClient())
             {
