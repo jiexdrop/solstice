@@ -15,7 +15,6 @@ public class DungeonGeneration : MonoBehaviour
     // Tilemap 2 = Ground
     public TileBase[] tiles;
 
-
     public void Generate(int seed)
     {
         Debug.Log("Generating Dungeon with seed: " + seed);
@@ -24,19 +23,20 @@ public class DungeonGeneration : MonoBehaviour
 
 
         Room room = new Room(0, 0, 10, 10);
+        //Room room = new Room(0, 0, 30, 20); // ?
         room.openings[0] = true;
         room.openings[1] = true;
         room.openings[2] = true;
         room.openings[3] = true;
 
-        int limit = 5;
+
+        int limit = 4;
         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, limit);
 
     }
 
     private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, int limit)
     {
-
         room.Generate(backgroundTilemap, wallsTilemap, tiles);
         if (limit > 0)
         {
@@ -46,10 +46,10 @@ public class DungeonGeneration : MonoBehaviour
                 {
                     switch (i)
                     {
-                        case (int)(Opening.TOP):
+                        case (int)Opening.TOP:
                             {
-                                Road road = new Road(room.x, room.y + 10, 5, 10);
-                                Room nextRoom = new Room(road.x, road.y + 10, 10, 10);
+                                Road road = new Road(room.x, room.y + room.height, 5, room.height);
+                                Room nextRoom = new Room(road.x, road.y + room.height, 10, 10);
                                 nextRoom.openings[(int)Opening.BOTTOM] = true;
                                 if (backgroundTilemap.GetTile(new Vector3Int(nextRoom.x, nextRoom.y, 0)) == null)
                                 {
@@ -58,10 +58,10 @@ public class DungeonGeneration : MonoBehaviour
                                 }
                             }
                             break;
-                        case (int)(Opening.BOTTOM):
+                        case (int)Opening.BOTTOM:
                             {
-                                Road road = new Road(room.x, room.y - 10, 5, 10);
-                                Room nextRoom = new Room(road.x, road.y - 10, 10, 10);
+                                Road road = new Road(room.x, room.y - room.height, 5, room.height);
+                                Room nextRoom = new Room(road.x, road.y - room.height, 10, 10);
                                 nextRoom.openings[(int)Opening.TOP] = true;
                                 if (backgroundTilemap.GetTile(new Vector3Int(nextRoom.x, nextRoom.y, 0)) == null)
                                 {
@@ -70,11 +70,11 @@ public class DungeonGeneration : MonoBehaviour
                                 }
                             }
                             break;
-                        case (int)(Opening.LEFT):
+                        case (int)Opening.LEFT:
                             {
-                                Road road = new Road(room.x - 10, room.y, 10, 5);
+                                Road road = new Road(room.x - room.width, room.y, room.width, 5);
                                 road.horizontal = true;
-                                Room nextRoom = new Room(road.x - 10, road.y, 10, 10);
+                                Room nextRoom = new Room(road.x - room.width, road.y, 10, 10);
                                 nextRoom.openings[(int)Opening.RIGHT] = true;
                                 if (backgroundTilemap.GetTile(new Vector3Int(nextRoom.x, nextRoom.y, 0)) == null)
                                 {
@@ -83,11 +83,11 @@ public class DungeonGeneration : MonoBehaviour
                                 }
                             }
                             break;
-                        case (int)(Opening.RIGHT):
+                        case (int)Opening.RIGHT:
                             {
-                                Road road = new Road(room.x + 10, room.y, 10, 5);
+                                Road road = new Road(room.x + room.width, room.y, room.width, 5);
                                 road.horizontal = true;
-                                Room nextRoom = new Room(road.x + 10, road.y, 10, 10);
+                                Room nextRoom = new Room(road.x + room.width, road.y, 10, 10);
                                 nextRoom.openings[(int)Opening.LEFT] = true;
                                 if (backgroundTilemap.GetTile(new Vector3Int(nextRoom.x, nextRoom.y, 0)) == null)
                                 {
@@ -96,10 +96,42 @@ public class DungeonGeneration : MonoBehaviour
                                 }
                             }
                             break;
+
                     }
                 }
             }
         }
+        // Close the room if no road 
+        for(int i = 0; i < room.openings.Length; i++)
+        {
+            if(backgroundTilemap.GetTile(new Vector3Int(room.x, room.y + room.height, 0)) == null)
+            {
+                room.openings[(int)Opening.TOP] = false;
+            }
+
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y - room.height, 0)) == null)
+            {
+                room.openings[(int)Opening.BOTTOM] = false;
+            }
+
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x + room.width, room.y, 0)) == null)
+            {
+                room.openings[(int)Opening.RIGHT] = false;
+            }
+
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x - room.width, room.y, 0)) == null)
+            {
+                room.openings[(int)Opening.LEFT] = false;
+            }
+        }
+        room.Generate(backgroundTilemap, wallsTilemap, tiles);
+    }
+
+
+    internal void Clear()
+    {
+        backgroundTilemap.ClearAllTiles();
+        wallsTilemap.ClearAllTiles();
     }
 
     public enum Opening

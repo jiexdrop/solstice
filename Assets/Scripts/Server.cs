@@ -86,6 +86,14 @@ public class Server : MonoBehaviour
 
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            // Testing
+            seed = Random.Range(0, Int32.MaxValue);
+            dungeonGeneration.Clear();
+            dungeonGeneration.Generate(seed);
+        }
+
         switch (state)
         {
             case GameState.STOP:
