@@ -107,4 +107,10 @@ public class TCPServer
             Debug.Log("Socket exception: " + socketException);
         }
     }
+
+    internal void Close()
+    {
+        tcpListener.Stop();
+        tcpListenerThread.Abort();
+    }
 }

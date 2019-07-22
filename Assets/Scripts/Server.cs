@@ -81,6 +81,7 @@ public class Server : MonoBehaviour
         panelsManager.ShowGamePanel();
         state = GameState.GAME;
         ServerStartGameMessage ssgm = new ServerStartGameMessage();
+        os.Close();
         s.ServerSend(ssgm);
     }
 
