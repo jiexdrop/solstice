@@ -38,7 +38,7 @@ public class DungeonGeneration : MonoBehaviour
             room.openings[makeOpening] = true;
         }
 
-        int limit = 4;
+        int limit = 16;
         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, limit);
 
     }
@@ -63,8 +63,11 @@ public class DungeonGeneration : MonoBehaviour
                                 nextRoom.openings[(int)Opening.BOTTOM] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
-                                    road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                    GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
+                                    {
+                                        road.Generate(backgroundTilemap, wallsTilemap, tiles);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    }
                                 }
                             }
                             break;
@@ -77,8 +80,11 @@ public class DungeonGeneration : MonoBehaviour
                                 nextRoom.openings[(int)Opening.TOP] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
-                                    road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                    GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
+                                    {
+                                        road.Generate(backgroundTilemap, wallsTilemap, tiles);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    }
                                 }
                             }
                             break;
@@ -92,8 +98,11 @@ public class DungeonGeneration : MonoBehaviour
                                 nextRoom.openings[(int)Opening.RIGHT] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
-                                    road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                    GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
+                                    {
+                                        road.Generate(backgroundTilemap, wallsTilemap, tiles);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    }
                                 }
                             }
                             break;
@@ -107,8 +116,11 @@ public class DungeonGeneration : MonoBehaviour
                                 nextRoom.openings[(int)Opening.LEFT] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
-                                    road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                    GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
+                                    {
+                                        road.Generate(backgroundTilemap, wallsTilemap, tiles);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                    }
                                 }
                             }
                             break;
@@ -120,32 +132,52 @@ public class DungeonGeneration : MonoBehaviour
         // Close the room if no road 
         for (int i = 0; i < room.openings.Length; i++)
         {
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y + room.height, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y + room.height/2+1, 0)) == null)
             {
                 room.openings[(int)Opening.TOP] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y - room.height, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y - room.height/2-1, 0)) == null)
             {
                 room.openings[(int)Opening.BOTTOM] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x + room.width, room.y, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x + room.width/2+1, room.y, 0)) == null)
             {
                 room.openings[(int)Opening.RIGHT] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x - room.width, room.y, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x - room.width/2-1, room.y, 0)) == null)
             {
                 room.openings[(int)Opening.LEFT] = false;
             }
+
         }
         room.Generate(backgroundTilemap, wallsTilemap, tiles);
     }
 
+    private bool IsSpaceForRoad(Tilemap backgroundTilemap, Tilemap wallsTilemap, Road road)
+    {
+        for (int i = -road.width / 2 + road.x + 1; i < road.width / 2 + road.x; i++)
+        {
+            for (int j = -road.height / 2 + road.y + 1; j < road.height / 2 + road.y; j++)
+            {
+                if (backgroundTilemap.GetTile(new Vector3Int(i, j, 0)) != null)
+                {
+                    return false;
+                }
+                if (wallsTilemap.GetTile(new Vector3Int(i, j, 0)) != null)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private bool IsSpaceForRoom(Tilemap backgroundTilemap, Tilemap wallsTilemap, Room room, int margin)
     {
-        for (int i = -room.width / 2 + room.x -margin; i < room.width / 2 + room.x + margin; i++)
+        for (int i = -room.width / 2 + room.x - margin; i < room.width / 2 + room.x + margin; i++)
         {
             for (int j = -room.height / 2 + room.y - margin; j < room.height / 2 + room.y + margin; j++)
             {
