@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Client : MonoBehaviour
 {
@@ -15,6 +17,7 @@ public class Client : MonoBehaviour
     private GameObject [] players = new GameObject[4];
     private Player player;
     private Vector2 [] startPlayersPositions = new Vector2[4];
+
     private Vector2 [] endPlayersPositions = new Vector2[4];
     private float [] startPlayersRotations = new float[4];
     private float [] endPlayersRotations = new float[4];
@@ -34,6 +37,7 @@ public class Client : MonoBehaviour
     MovementMessage clientMovement = new MovementMessage();
 
     private float elapsed;
+    private bool sharingMovements;
 
     UDPClient c = new UDPClient();
 
@@ -104,7 +108,13 @@ public class Client : MonoBehaviour
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    SendPosition(player.gameObject);
+                    if (sharingMovements)
+                    {
+                        SendPosition(player.gameObject);
+                    } else
+                    {
+                        sharingMovements = true;
+                    }
                 }
 
                 // Lerp server shared movements
@@ -153,6 +163,7 @@ public class Client : MonoBehaviour
                         setPlayerId = true;
 
                         seed = sharePlayersMessage.seed;
+                        dungeonGeneration.SetClient(this);
                         dungeonGeneration.Generate(seed);
                     }
 
@@ -209,6 +220,19 @@ public class Client : MonoBehaviour
                     }
                 }
                 break;
+            case MessageType.SERVER_GO_TO_NEXT_ROOM:
+                {
+                    //Debug.Log("Server go to next room");
+                    ServerGoToNextRoomMessage ssm = (ServerGoToNextRoomMessage)c.received;
+                    for(int i = 0; i<ssm.x.Length; i++)
+                    {
+                        players[i].transform.position=new Vector3(ssm.x[i], ssm.y[i], 0);
+                    }
+
+                    dungeonGeneration.Clear();
+                    dungeonGeneration.Generate(ssm.seed);
+                }
+                break;
         }
         c.received.OnRead();
 
@@ -247,5 +271,20 @@ public class Client : MonoBehaviour
         clientMovement.playerId = playerId;
 
         c.ClientSend(clientMovement);
+    }
+
+    public void GoToNextRoom()
+    {
+        seed = Random.Range(0, Int32.MaxValue);
+        dungeonGeneration.Clear();
+        dungeonGeneration.Generate(seed);
+
+        ClientGoToNextRoomMessage goToNextRoomMessage = new ClientGoToNextRoomMessage();
+
+        goToNextRoomMessage.seed = seed;
+
+        sharingMovements = false;
+
+        c.ClientSend(goToNextRoomMessage);
     }
 }

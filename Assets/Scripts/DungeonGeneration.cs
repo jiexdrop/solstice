@@ -14,6 +14,8 @@ public class DungeonGeneration : MonoBehaviour
     [Header("Prefabs")]
     public GameObject portalPrefab;
 
+    public GameObject portal;
+
     // Tilemap 0 = Dark
     // Tilemap 1 = Wall
     // Tilemap 2 = DarkWall
@@ -25,6 +27,19 @@ public class DungeonGeneration : MonoBehaviour
     public List<Road> roads = new List<Road>();
     public Room lastRoom;
     public int maxDepth;
+
+    private Server server;
+    private Client client;
+
+    public void SetServer(Server server)
+    {
+        this.server = server;
+    }
+
+    public void SetClient(Client client)
+    {
+        this.client = client;
+    }
 
     public void Generate(int seed)
     {
@@ -55,15 +70,20 @@ public class DungeonGeneration : MonoBehaviour
 
         int limit = 2;
         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, limit, 0);
-        lastRoom.LastRoom(portalPrefab, foregroundTilemap, tiles);
-        
+
+        room.DrawEntrance(backgroundTilemap, tiles);
+
+        portal = Instantiate(portalPrefab, new Vector3Int(lastRoom.x, lastRoom.y, 0), Quaternion.identity);
+        portal.GetComponent<Portal>().SetServer(server);
+        portal.GetComponent<Portal>().SetClient(client);
+
     }
 
     private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, int limit, int depth)
     {
         room.Generate(backgroundTilemap, wallsTilemap, tiles);
         rooms.Add(room);
-        if(depth > maxDepth)
+        if (depth > maxDepth)
         {
             maxDepth = depth;
             lastRoom = room;
@@ -158,22 +178,22 @@ public class DungeonGeneration : MonoBehaviour
         // Close the room if no road 
         for (int i = 0; i < room.openings.Length; i++)
         {
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y + room.height/2+1, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y + room.height / 2 + 1, 0)) == null)
             {
                 room.openings[(int)Opening.TOP] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y - room.height/2-1, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x, room.y - room.height / 2 - 1, 0)) == null)
             {
                 room.openings[(int)Opening.BOTTOM] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x + room.width/2+1, room.y, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x + room.width / 2 + 1, room.y, 0)) == null)
             {
                 room.openings[(int)Opening.RIGHT] = false;
             }
 
-            if (backgroundTilemap.GetTile(new Vector3Int(room.x - room.width/2-1, room.y, 0)) == null)
+            if (backgroundTilemap.GetTile(new Vector3Int(room.x - room.width / 2 - 1, room.y, 0)) == null)
             {
                 room.openings[(int)Opening.LEFT] = false;
             }
@@ -224,6 +244,8 @@ public class DungeonGeneration : MonoBehaviour
     {
         backgroundTilemap.ClearAllTiles();
         wallsTilemap.ClearAllTiles();
+
+        Destroy(portal);
     }
 
     public enum Opening
@@ -311,7 +333,8 @@ public class DungeonGeneration : MonoBehaviour
                     if (Random.Range(0, 16) > 2)
                     {
                         backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[3]);
-                    } else
+                    }
+                    else
                     {
                         backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[4]);
                     }
@@ -419,9 +442,15 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        public void LastRoom(GameObject portalPrefab, Tilemap foregroundTilemap, TileBase[] tiles)
+        internal void DrawEntrance(Tilemap tilemap, TileBase[] tiles)
         {
-            Instantiate(portalPrefab, new Vector3Int(x, y, 0), Quaternion.identity);
+            for (int i = x - 1; i < x + 1; i++)
+            {
+                for (int j = y - 1; j < y + 1; j++)
+                {
+                    tilemap.SetTile(new Vector3Int(i, j, 0), tiles[7]);
+                }
+            }
         }
     }
 }

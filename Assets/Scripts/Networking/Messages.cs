@@ -13,7 +13,10 @@ public enum MessageType
 
     MOVEMENT,
     SERVER_SHARE_MOVEMENT,
-    
+
+    CLIENT_GO_TO_NEXT_ROOM,
+    SERVER_GO_TO_NEXT_ROOM,
+
     SHOOT,
     SERVER_SHARE_SHOOT,
 }
@@ -55,7 +58,7 @@ public class MovementMessage : Message
 [System.Serializable]
 public class ServerSharePlayersMessage : Message
 {
-    
+
     public float[] x;
     public float[] y;
 
@@ -73,9 +76,9 @@ public class ServerSharePlayersMessage : Message
 [System.Serializable]
 public class ServerShareMovementMessage : Message
 {
-    public float [] x;
-    public float [] y;
-    public float [] visorRotation;
+    public float[] x;
+    public float[] y;
+    public float[] visorRotation;
 
     public ServerShareMovementMessage()
     {
@@ -126,4 +129,31 @@ public class ServerStartGameMessage : Message
         type = MessageType.SERVER_START_GAME;
     }
 }
+
+
+[System.Serializable]
+public class ServerGoToNextRoomMessage : Message
+{
+    public float[] x;
+    public float[] y;
+    public int seed;
+
+    public ServerGoToNextRoomMessage()
+    {
+        type = MessageType.SERVER_GO_TO_NEXT_ROOM;
+    }
+}
+
+[System.Serializable]
+public class ClientGoToNextRoomMessage : Message
+{
+    public int seed;
+
+    public ClientGoToNextRoomMessage()
+    {
+        type = MessageType.CLIENT_GO_TO_NEXT_ROOM;
+    }
+}
+
+
 

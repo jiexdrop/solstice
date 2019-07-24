@@ -34,6 +34,7 @@ public class Server : MonoBehaviour
     MovementMessage serverMovement = new MovementMessage();
 
     private float elapsed;
+    private bool sharingMovements;
 
     // This server shares movement data
     UDPServer s = new UDPServer();
@@ -67,7 +68,9 @@ public class Server : MonoBehaviour
             panelsManager.ShowLobbyPanel();
 
             seed = Random.Range(0, Int32.MaxValue);
+            dungeonGeneration.SetServer(this);
             dungeonGeneration.Generate(seed);
+
         }
         else
         {
@@ -121,7 +124,13 @@ public class Server : MonoBehaviour
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
-                    ShareMovements();
+                    if (sharingMovements)
+                    {
+                        ShareMovements();
+                    }else
+                    {
+                        sharingMovements = true;
+                    }
                 }
 
                 // Server movement Lerp 
@@ -172,6 +181,10 @@ public class Server : MonoBehaviour
                 ShootMessage sm = (ShootMessage)s.received;
                 ClientShoot(sm.playerId);
                 ShareShoots(sm.playerId);
+                break;
+            case MessageType.CLIENT_GO_TO_NEXT_ROOM:
+                ClientGoToNextRoomMessage goToNextRoomMessage = (ClientGoToNextRoomMessage)s.received;
+                GoToNextRoom(goToNextRoomMessage.seed);
                 break;
         }
         s.received.OnRead();
@@ -263,6 +276,40 @@ public class Server : MonoBehaviour
         ServerShareShootMessage shoot = new ServerShareShootMessage();
         shoot.playerId = playerId;
         s.ServerSend(shoot);
+    }
+
+    public void GoToNextRoom()
+    {
+        GoToNextRoom(Random.Range(0, Int32.MaxValue));
+    }
+
+    public void GoToNextRoom(int seed)
+    {
+        dungeonGeneration.Clear();
+        dungeonGeneration.Generate(seed);
+
+        ServerGoToNextRoomMessage goToNextRoomMessage = new ServerGoToNextRoomMessage();
+
+        for (int i = 0; i < nbOfPlayers; i++)
+        {
+            players[i].transform.position = Random.insideUnitCircle;
+        }
+
+        goToNextRoomMessage.x = new float[nbOfPlayers];
+        goToNextRoomMessage.y = new float[nbOfPlayers];
+
+        for(int i = 0; i< nbOfPlayers; i++)
+        {
+            goToNextRoomMessage.x[i] = players[i].transform.position.x;
+            goToNextRoomMessage.y[i] = players[i].transform.position.y;
+        }
+
+        goToNextRoomMessage.seed = seed;
+
+        sharingMovements = false;
+
+        s.ServerSend(goToNextRoomMessage);
+
     }
 
 }
