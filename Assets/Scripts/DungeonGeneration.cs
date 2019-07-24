@@ -9,19 +9,34 @@ public class DungeonGeneration : MonoBehaviour
 {
     public Tilemap backgroundTilemap;
     public Tilemap wallsTilemap;
+    public Tilemap foregroundTilemap;
+
+    [Header("Prefabs")]
+    public GameObject portalPrefab;
 
     // Tilemap 0 = Dark
     // Tilemap 1 = Wall
-    // Tilemap 2 = Ground
+    // Tilemap 2 = DarkWall
+    // Tilemap 3 = Ground
+    // Tilemap 4 = Grass
     public TileBase[] tiles;
+
+    public List<Room> rooms = new List<Room>();
+    public List<Road> roads = new List<Road>();
+    public Room lastRoom;
+    public int maxDepth;
 
     public void Generate(int seed)
     {
         Debug.Log("Generating Dungeon with seed: " + seed);
 
+        maxDepth = 0;
+
         Random.InitState(seed);
 
-        Room room = new Room(0, 0, 30, 20);
+        int randomWidth = Random.Range(5, 15) * 2;
+        int randomHeight = Random.Range(5, 15) * 2;
+        Room room = new Room(0, 0, randomWidth, randomHeight);
 
         bool hasAtLeastOneOpening = false;
         for (int i = 0; i < room.openings.Length; i++)
@@ -38,14 +53,21 @@ public class DungeonGeneration : MonoBehaviour
             room.openings[makeOpening] = true;
         }
 
-        int limit = 16;
-        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, limit);
-
+        int limit = 2;
+        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, limit, 0);
+        lastRoom.LastRoom(portalPrefab, foregroundTilemap, tiles);
+        
     }
 
-    private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, int limit)
+    private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, int limit, int depth)
     {
         room.Generate(backgroundTilemap, wallsTilemap, tiles);
+        rooms.Add(room);
+        if(depth > maxDepth)
+        {
+            maxDepth = depth;
+            lastRoom = room;
+        }
         if (limit > 0)
         {
             for (int i = 0; i < room.openings.Length; i++)
@@ -66,7 +88,8 @@ public class DungeonGeneration : MonoBehaviour
                                     if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                        roads.Add(road);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit, ++depth);
                                     }
                                 }
                             }
@@ -83,7 +106,8 @@ public class DungeonGeneration : MonoBehaviour
                                     if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                        roads.Add(road);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit, ++depth);
                                     }
                                 }
                             }
@@ -101,7 +125,8 @@ public class DungeonGeneration : MonoBehaviour
                                     if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                        roads.Add(road);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit, ++depth);
                                     }
                                 }
                             }
@@ -119,7 +144,8 @@ public class DungeonGeneration : MonoBehaviour
                                     if (IsSpaceForRoad(backgroundTilemap, wallsTilemap, road))
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit);
+                                        roads.Add(road);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, --limit, ++depth);
                                     }
                                 }
                             }
@@ -248,7 +274,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             for (int i = -height / 2 + y + 1; i < height / 2 + y; i++)
             {
-                wallsTilemap.SetTile(new Vector3Int(-width / 2 + x, i, 0), tiles[7]);
+                wallsTilemap.SetTile(new Vector3Int(-width / 2 + x, i, 0), tiles[2]);
             }
         }
 
@@ -256,7 +282,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             for (int i = -height / 2 + 1 + y; i < height / 2 + y; i++)
             {
-                wallsTilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), tiles[7]);
+                wallsTilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), tiles[2]);
             }
         }
 
@@ -264,7 +290,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             for (int i = -width / 2 + x + 1; i < width / 2 + x; i++)
             {
-                wallsTilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), tiles[7]);
+                wallsTilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), tiles[2]);
             }
         }
 
@@ -272,7 +298,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             for (int i = -width / 2 + x + 1; i < width / 2 + x; i++)
             {
-                wallsTilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), tiles[7]);
+                wallsTilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), tiles[2]);
             }
         }
 
@@ -282,7 +308,13 @@ public class DungeonGeneration : MonoBehaviour
             {
                 for (int j = -height / 2 + y + 1; j < height / 2 + y; j++)
                 {
-                    backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[2]);
+                    if (Random.Range(0, 16) > 2)
+                    {
+                        backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[3]);
+                    } else
+                    {
+                        backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[4]);
+                    }
                 }
             }
         }
@@ -326,7 +358,14 @@ public class DungeonGeneration : MonoBehaviour
             {
                 for (int j = -height / 2 + y; j <= height / 2 + y; j++)
                 {
-                    backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[2]);
+                    if (Random.Range(0, 16) > 2)
+                    {
+                        backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[3]);
+                    }
+                    else
+                    {
+                        backgroundTilemap.SetTile(new Vector3Int(i, j, 0), tiles[4]);
+                    }
                 }
             }
         }
@@ -378,6 +417,11 @@ public class DungeonGeneration : MonoBehaviour
                 }
 
             }
+        }
+
+        public void LastRoom(GameObject portalPrefab, Tilemap foregroundTilemap, TileBase[] tiles)
+        {
+            Instantiate(portalPrefab, new Vector3Int(x, y, 0), Quaternion.identity);
         }
     }
 }
