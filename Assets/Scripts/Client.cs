@@ -14,14 +14,14 @@ public class Client : MonoBehaviour
     private int nbOfPlayers;
     private int playerId;
     private bool setPlayerId = false;
-    private GameObject [] players = new GameObject[4];
+    private GameObject[] players = new GameObject[4];
     private Player player;
-    private Vector2 [] startPlayersPositions = new Vector2[4];
+    private Vector2[] startPlayersPositions = new Vector2[4];
 
-    private Vector2 [] endPlayersPositions = new Vector2[4];
-    private float [] startPlayersRotations = new float[4];
-    private float [] endPlayersRotations = new float[4];
-    private float [] timesStartedLerping = new float[4];
+    private Vector2[] endPlayersPositions = new Vector2[4];
+    private float[] startPlayersRotations = new float[4];
+    private float[] endPlayersRotations = new float[4];
+    private float[] timesStartedLerping = new float[4];
 
     private List<GameObject> projectiles = new List<GameObject>();
 
@@ -108,10 +108,12 @@ public class Client : MonoBehaviour
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
+                    dungeonGeneration.HighlightRoom(player);
                     if (sharingMovements)
                     {
                         SendPosition(player.gameObject);
-                    } else
+                    }
+                    else
                     {
                         sharingMovements = true;
                     }
@@ -149,8 +151,17 @@ public class Client : MonoBehaviour
             case MessageType.NONE:
                 break;
             case MessageType.SERVER_START_GAME:
-                panelsManager.ShowGamePanel();
-                state = GameState.GAME;
+                {
+                    panelsManager.ShowGamePanel();
+
+                    // Define player and camera only once at the start of the game
+                    player = players[playerId].GetComponent<Player>();
+
+                    // Set camera as a child of the player
+                    Camera.main.transform.parent = player.transform;
+
+                    state = GameState.GAME;
+                }
                 break;
             case MessageType.SERVER_SHARE_PLAYERS:
                 {
@@ -161,7 +172,6 @@ public class Client : MonoBehaviour
                     {
                         playerId = sharePlayersMessage.playerId;
                         setPlayerId = true;
-
                         seed = sharePlayersMessage.seed;
                         dungeonGeneration.SetClient(this);
                         dungeonGeneration.Generate(seed);
@@ -184,10 +194,6 @@ public class Client : MonoBehaviour
                         // Lobby
                         playerPanels[i].SetActivePlayer(true);
                     }
-
-                    player = players[playerId].GetComponent<Player>();
-                    // Set camera as a child of the player
-                    Camera.main.transform.parent = player.transform;
 
                 }
                 break;
@@ -224,9 +230,9 @@ public class Client : MonoBehaviour
                 {
                     //Debug.Log("Server go to next room");
                     ServerGoToNextRoomMessage ssm = (ServerGoToNextRoomMessage)c.received;
-                    for(int i = 0; i<ssm.x.Length; i++)
+                    for (int i = 0; i < ssm.x.Length; i++)
                     {
-                        players[i].transform.position=new Vector3(ssm.x[i], ssm.y[i], 0);
+                        players[i].transform.position = new Vector3(ssm.x[i], ssm.y[i], 0);
                     }
 
                     dungeonGeneration.Clear();

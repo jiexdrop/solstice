@@ -202,6 +202,17 @@ public class DungeonGeneration : MonoBehaviour
         room.Generate(backgroundTilemap, wallsTilemap, tiles);
     }
 
+    internal void HighlightRoom(Player player)
+    {
+        foreach(Room room in rooms)
+        {
+            if (room.PlayerIsInside(player))
+            {
+                room.Highlight(backgroundTilemap, wallsTilemap, tiles);
+            }
+        }
+    }
+
     private bool IsSpaceForRoad(Tilemap backgroundTilemap, Tilemap wallsTilemap, Road road)
     {
         for (int i = -road.width / 2 + road.x + 1; i < road.width / 2 + road.x; i++)
@@ -242,6 +253,8 @@ public class DungeonGeneration : MonoBehaviour
 
     internal void Clear()
     {
+        rooms.Clear();
+        roads.Clear();
         backgroundTilemap.ClearAllTiles();
         wallsTilemap.ClearAllTiles();
 
@@ -367,10 +380,20 @@ public class DungeonGeneration : MonoBehaviour
 
         public void Generate(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles)
         {
-            TopWall(wallsTilemap, tiles, openings[(int)Opening.TOP]);
-            BottomWall(wallsTilemap, tiles, openings[(int)Opening.BOTTOM]);
-            LeftWall(wallsTilemap, tiles, openings[(int)Opening.LEFT]);
-            RightWall(wallsTilemap, tiles, openings[(int)Opening.RIGHT]);
+            TopWall(wallsTilemap, tiles[1], openings[(int)Opening.TOP]);
+            BottomWall(wallsTilemap, tiles[1], openings[(int)Opening.BOTTOM]);
+            LeftWall(wallsTilemap, tiles[1], openings[(int)Opening.LEFT]);
+            RightWall(wallsTilemap, tiles[1], openings[(int)Opening.RIGHT]);
+
+            Ground(backgroundTilemap, tiles);
+        }
+
+        public void Highlight(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles)
+        {
+            TopWall(wallsTilemap, tiles[10], openings[(int)Opening.TOP]);
+            BottomWall(wallsTilemap, tiles[10], openings[(int)Opening.BOTTOM]);
+            LeftWall(wallsTilemap, tiles[10], openings[(int)Opening.LEFT]);
+            RightWall(wallsTilemap, tiles[10], openings[(int)Opening.RIGHT]);
 
             Ground(backgroundTilemap, tiles);
         }
@@ -393,11 +416,11 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        public void TopWall(Tilemap tilemap, TileBase[] tiles, bool open)
+        public void TopWall(Tilemap tilemap, TileBase tile, bool open)
         {
             for (int i = -width / 2 + x; i < width / 2 + x; i++)
             {
-                tilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), tiles[1]);
+                tilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), tile);
                 if (open && i >= x - 1 && i <= x + 1)
                 {
                     tilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), null);
@@ -405,11 +428,11 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        public void LeftWall(Tilemap tilemap, TileBase[] tiles, bool open)
+        public void LeftWall(Tilemap tilemap, TileBase tile, bool open)
         {
             for (int i = -height / 2 + y; i < height / 2 + y; i++)
             {
-                tilemap.SetTile(new Vector3Int(-width / 2 + x, i, 0), tiles[1]);
+                tilemap.SetTile(new Vector3Int(-width / 2 + x, i, 0), tile);
                 if (open && i >= y - 1 && i <= y + 1)
                 {
                     tilemap.SetTile(new Vector3Int(-width / 2 + x, i, 0), null);
@@ -417,11 +440,11 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        public void RightWall(Tilemap tilemap, TileBase[] tiles, bool open)
+        public void RightWall(Tilemap tilemap, TileBase tile, bool open)
         {
             for (int i = -height / 2 + y; i <= height / 2 + y; i++)
             {
-                tilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), tiles[1]);
+                tilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), tile);
                 if (open && i >= y - 1 && i <= y + 1)
                 {
                     tilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), null);
@@ -429,11 +452,11 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        public void BottomWall(Tilemap tilemap, TileBase[] tiles, bool open)
+        public void BottomWall(Tilemap tilemap, TileBase tile, bool open)
         {
             for (int i = -width / 2 + x; i < width / 2 + x; i++)
             {
-                tilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), tiles[1]);
+                tilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), tile);
                 if (open && i >= x - 1 && i <= x + 1)
                 {
                     tilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), null);
@@ -451,6 +474,27 @@ public class DungeonGeneration : MonoBehaviour
                     tilemap.SetTile(new Vector3Int(i, j, 0), tiles[7]);
                 }
             }
+        }
+
+        internal bool PlayerIsInside(Player player)
+        {
+            Vector3Int playerPos = new Vector3Int();
+            playerPos.x = Mathf.RoundToInt(player.transform.position.x);
+            playerPos.y = Mathf.RoundToInt(player.transform.position.y);
+
+            for(int i = -width/2 +x; i <= width/2 + x; i++)
+            {
+                for(int j = -height/2 + y; j <= height/2 + y; j++)
+                {
+                    Vector3Int pos = new Vector3Int(i, j, 0);
+                    if (playerPos.Equals(pos))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

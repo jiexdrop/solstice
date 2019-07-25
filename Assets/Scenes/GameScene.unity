@@ -176,6 +176,7 @@ MonoBehaviour:
   foregroundTilemap: {fileID: 1874933619}
   portalPrefab: {fileID: 252167640699014047, guid: 2ce81896a1e2f2c4fa64750b2b69298b,
     type: 3}
+  portal: {fileID: 0}
   tiles:
   - {fileID: 11400000, guid: 10a612c13db4dad49a14fb7f925750cf, type: 2}
   - {fileID: 11400000, guid: 5430e243214a8494fbf673473ab61912, type: 2}
@@ -1217,6 +1218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 3314557595949612381, guid: 499fd30542eaf044297e812a0d067bb7,
+    type: 3}
+  slimePrefab: {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c,
     type: 3}
   projectilePrefab: {fileID: 1604766832769618964, guid: 18e7a6996071b3f49b44ba3a3ebbdf36,
     type: 3}

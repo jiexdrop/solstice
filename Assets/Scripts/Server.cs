@@ -9,6 +9,7 @@ public class Server : MonoBehaviour
 {
     [Header("Prefabs")]
     public GameObject playerPrefab;
+    public GameObject slimePrefab;
     public GameObject projectilePrefab;
 
     private int nbOfPlayers;
@@ -124,6 +125,7 @@ public class Server : MonoBehaviour
                 if (elapsed >= GameManager.FREQUENCY)
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
+                    dungeonGeneration.HighlightRoom(player);
                     if (sharingMovements)
                     {
                         ShareMovements();
