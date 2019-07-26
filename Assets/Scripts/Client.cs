@@ -52,6 +52,9 @@ public class Client : MonoBehaviour
     public DungeonGeneration dungeonGeneration;
     public int seed;
 
+    [Header("Spawner")]
+    public Spawner spawner;
+
     void Start()
     {
         if (GameManager.Instance.type.Equals(ConnectionType.CLIENT))
@@ -175,6 +178,8 @@ public class Client : MonoBehaviour
                         seed = sharePlayersMessage.seed;
                         dungeonGeneration.SetClient(this);
                         dungeonGeneration.Generate(seed);
+                        spawner.ClearMonsters();
+                        spawner.rooms = dungeonGeneration.rooms;
                     }
 
 
@@ -235,8 +240,16 @@ public class Client : MonoBehaviour
                         players[i].transform.position = new Vector3(ssm.x[i], ssm.y[i], 0);
                     }
 
+                    spawner.ClearMonsters();
                     dungeonGeneration.Clear();
                     dungeonGeneration.Generate(ssm.seed);
+                    
+                }
+                break;
+            case MessageType.SERVER_SHARE_MONSTERS_SPAWN:
+                {
+                    ServerShareMonstersSpawnMessage ssmsm = (ServerShareMonstersSpawnMessage)c.received;
+                    spawner.SpawnMonsters(ssmsm.roomId);
                 }
                 break;
         }

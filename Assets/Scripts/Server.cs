@@ -9,7 +9,6 @@ public class Server : MonoBehaviour
 {
     [Header("Prefabs")]
     public GameObject playerPrefab;
-    public GameObject slimePrefab;
     public GameObject projectilePrefab;
 
     private int nbOfPlayers;
@@ -53,6 +52,9 @@ public class Server : MonoBehaviour
     public DungeonGeneration dungeonGeneration;
     public int seed;
 
+    [Header("Spawner")]
+    public Spawner spawner;
+
     void Start()
     {
         if (GameManager.Instance.type.Equals(ConnectionType.SERVER))
@@ -70,8 +72,9 @@ public class Server : MonoBehaviour
 
             seed = Random.Range(0, Int32.MaxValue);
             dungeonGeneration.SetServer(this);
+            spawner.SetServer(this);
             dungeonGeneration.Generate(seed);
-
+            spawner.rooms = dungeonGeneration.rooms;
         }
         else
         {
@@ -96,6 +99,8 @@ public class Server : MonoBehaviour
             // Testing
             seed = Random.Range(0, Int32.MaxValue);
             dungeonGeneration.Clear();
+            spawner.SetServer(this);
+            spawner.ClearMonsters();
             dungeonGeneration.Generate(seed);
         }
 
@@ -129,7 +134,8 @@ public class Server : MonoBehaviour
                     if (sharingMovements)
                     {
                         ShareMovements();
-                    }else
+                    }
+                    else
                     {
                         sharingMovements = true;
                     }
@@ -288,6 +294,7 @@ public class Server : MonoBehaviour
     public void GoToNextRoom(int seed)
     {
         dungeonGeneration.Clear();
+        spawner.ClearMonsters();
         dungeonGeneration.Generate(seed);
 
         ServerGoToNextRoomMessage goToNextRoomMessage = new ServerGoToNextRoomMessage();
@@ -314,4 +321,13 @@ public class Server : MonoBehaviour
 
     }
 
+    public void ShareSpawnMonsters(int roomId)
+    {
+        ServerShareMonstersSpawnMessage shareMonstersSpawnMessage = new ServerShareMonstersSpawnMessage();
+        shareMonstersSpawnMessage.roomId = roomId;
+
+        sharingMovements = false;
+
+        s.ServerSend(shareMonstersSpawnMessage);
+    }
 }

@@ -1219,8 +1219,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 3314557595949612381, guid: 499fd30542eaf044297e812a0d067bb7,
     type: 3}
-  slimePrefab: {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c,
-    type: 3}
   projectilePrefab: {fileID: 1604766832769618964, guid: 18e7a6996071b3f49b44ba3a3ebbdf36,
     type: 3}
   joystick: {fileID: 959305634}
@@ -1234,6 +1232,7 @@ MonoBehaviour:
   panelsManager: {fileID: 1232996823}
   dungeonGeneration: {fileID: 84915436}
   seed: 0
+  spawner: {fileID: 1424886049}
 --- !u!1 &959305630
 GameObject:
   m_ObjectHideFlags: 0
@@ -1482,6 +1481,7 @@ MonoBehaviour:
   panelsManager: {fileID: 1232996823}
   dungeonGeneration: {fileID: 84915436}
   seed: 0
+  spawner: {fileID: 1424886049}
 --- !u!1 &1232996818
 GameObject:
   m_ObjectHideFlags: 0
@@ -1662,6 +1662,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1424886048
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1424886050}
+  - component: {fileID: 1424886049}
+  m_Layer: 0
+  m_Name: Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1424886049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424886048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13f6c81dd92ae1d4996423d1436fa398, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slimePrefab: {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c,
+    type: 3}
+--- !u!4 &1424886050
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424886048}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &1504567026 stripped
 RectTransform:

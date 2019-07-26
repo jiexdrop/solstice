@@ -17,6 +17,8 @@ public enum MessageType
     CLIENT_GO_TO_NEXT_ROOM,
     SERVER_GO_TO_NEXT_ROOM,
 
+    SERVER_SHARE_MONSTERS_SPAWN,
+
     SHOOT,
     SERVER_SHARE_SHOOT,
 }
@@ -152,6 +154,18 @@ public class ClientGoToNextRoomMessage : Message
     public ClientGoToNextRoomMessage()
     {
         type = MessageType.CLIENT_GO_TO_NEXT_ROOM;
+    }
+}
+
+
+[System.Serializable]
+public class ServerShareMonstersSpawnMessage : Message
+{
+    public int roomId;
+
+    public ServerShareMonstersSpawnMessage()
+    {
+        type = MessageType.SERVER_SHARE_MONSTERS_SPAWN;
     }
 }
 
