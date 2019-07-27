@@ -54,7 +54,7 @@ public class AddressesManager : MonoBehaviour
         if(elapsed > 6f)
         {
             elapsed = elapsed % (6f);
-            Debug.LogError("New Scan");
+            Debug.Log("[AddressesManager] ScanNetwork");
             ScanNetwork(GameManager.PORT);
         }
 
@@ -106,7 +106,7 @@ public class AddressesManager : MonoBehaviour
 
                     if (!client.Connected) return;
 
-                    Debug.Log($"Success @{address}");
+                    Debug.Log($"[AddressesManager] Success @{address}");
 
                     if (!addresses.Contains(address))
                     {
@@ -118,7 +118,7 @@ public class AddressesManager : MonoBehaviour
                 }
                 catch (SocketException ex)
                 {
-                    Debug.Log($"Failed with error code: {ex.ErrorCode}");
+                    Debug.Log($"[AddressesManager] Failed with error code: {ex.ErrorCode}");
                 }
             }
         });

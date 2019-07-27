@@ -13,6 +13,7 @@ public class Spawner : MonoBehaviour
     public Dictionary<int, GameObject> monsters;
 
     private Server server;
+    private Client client;
 
     void Start()
     {
@@ -28,43 +29,49 @@ public class Spawner : MonoBehaviour
         monsters.Clear();
     }
 
-    public void SpawnMonsters(int key)
+    public void SpawnMonsters(int roomId, int seed)
     {
-        Room room = rooms[key];
-        Debug.Log(string.Format("Spawn monsters at room{0} key{1}", room, key));
+        Room room = rooms[roomId];
+        //Debug.Log(string.Format("Spawn monsters at room{0} key{1} with seed{2}", room, roomId, seed));
+        Random.InitState(seed);
+        GameObject roomMonsters = new GameObject(string.Format("Room {0} Monsters", roomId));
         for (int i = 0; i < 10; i++)
         {
             int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
             int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
-            monsters[monsters.Count] = Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity);
+            Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, roomMonsters.transform);
         }
+        monsters[monsters.Count] = roomMonsters;
         room.spawnedMonsters = true;
         room.inside = true; // TODO Remove me
     }
 
     void Update()
     {
-
-        foreach (KeyValuePair<int, Room> room in rooms)
+        if (rooms != null) // Before setting rooms dont do anything
         {
-            if (room.Value.inside && !room.Value.spawnedMonsters)
+            foreach (KeyValuePair<int, Room> room in rooms)
             {
-                switch (room.Value.type)
+                if (room.Value.inside && !room.Value.spawnedMonsters)
                 {
-                    case Room.Type.MONSTER:
-                        SpawnMonsters(room.Key);
-                        if (server != null)
-                        {
-                            server.ShareSpawnMonsters(room.Key);
-                        }
-                        break;
-                }
-            }
+                    switch (room.Value.type)
+                    {
+                        case Room.Type.MONSTER:
+                            int seed = Random.Range(0, Int32.MaxValue);
+                            SpawnMonsters(room.Key, seed);
+                            if (server != null)
+                            {
+                                server.ShareSpawnMonsters(room.Key, 0, seed); // 0 server playerId
+                            }
+                            if (client != null)
+                            {
+                                client.SpawnMonsters(room.Key, seed);
+                            }
 
-            if (!room.Value.inside && room.Value.spawnedMonsters)
-            {
-                room.Value.spawnedMonsters = false;
-                ClearMonsters();
+                            break;
+                    }
+                }
+
             }
         }
 
@@ -73,5 +80,10 @@ public class Spawner : MonoBehaviour
     public void SetServer(Server server)
     {
         this.server = server;
+    }
+
+    public void SetClient(Client client)
+    {
+        this.client = client;
     }
 }

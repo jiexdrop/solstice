@@ -178,6 +178,7 @@ public class Client : MonoBehaviour
                         seed = sharePlayersMessage.seed;
                         dungeonGeneration.SetClient(this);
                         dungeonGeneration.Generate(seed);
+                        spawner.SetClient(this);
                         spawner.ClearMonsters();
                         spawner.rooms = dungeonGeneration.rooms;
                     }
@@ -249,7 +250,11 @@ public class Client : MonoBehaviour
             case MessageType.SERVER_SHARE_MONSTERS_SPAWN:
                 {
                     ServerShareMonstersSpawnMessage ssmsm = (ServerShareMonstersSpawnMessage)c.received;
-                    spawner.SpawnMonsters(ssmsm.roomId);
+                    // If I'm not the one that has sent the request to spawn monsters
+                    if (ssmsm.playerId != playerId) 
+                    {
+                        spawner.SpawnMonsters(ssmsm.roomId, ssmsm.seed);
+                    }
                 }
                 break;
         }
@@ -306,4 +311,18 @@ public class Client : MonoBehaviour
 
         c.ClientSend(goToNextRoomMessage);
     }
+
+    public void SpawnMonsters(int roomId, int seed)
+    {
+        ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = new ClientShareMonstersSpawnMessage();
+
+        shareMonstersSpawnMessage.roomId = roomId; // the room where the monsters are spawned
+        shareMonstersSpawnMessage.playerId = playerId; // the player who spawns the monsters
+        shareMonstersSpawnMessage.seed = seed; // the player who spawns the monsters
+
+        sharingMovements = false;
+
+        c.ClientSend(shareMonstersSpawnMessage);
+    }
+
 }

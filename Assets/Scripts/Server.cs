@@ -194,6 +194,11 @@ public class Server : MonoBehaviour
                 ClientGoToNextRoomMessage goToNextRoomMessage = (ClientGoToNextRoomMessage)s.received;
                 GoToNextRoom(goToNextRoomMessage.seed);
                 break;
+            case MessageType.CLIENT_SHARE_MONSTERS_SPAWN:
+                ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = (ClientShareMonstersSpawnMessage)s.received;
+                spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
+                ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed);
+                break;
         }
         s.received.OnRead();
 
@@ -321,10 +326,12 @@ public class Server : MonoBehaviour
 
     }
 
-    public void ShareSpawnMonsters(int roomId)
+    public void ShareSpawnMonsters(int roomId, int playerId, int seed)
     {
         ServerShareMonstersSpawnMessage shareMonstersSpawnMessage = new ServerShareMonstersSpawnMessage();
         shareMonstersSpawnMessage.roomId = roomId;
+        shareMonstersSpawnMessage.playerId = playerId;
+        shareMonstersSpawnMessage.seed = seed;
 
         sharingMovements = false;
 
