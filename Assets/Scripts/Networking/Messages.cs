@@ -56,6 +56,11 @@ public class MovementMessage : Message
     public float x;
     public float y;
     public float visorRotation;
+
+    public MovementMessage()
+    {
+        type = MessageType.MOVEMENT;
+    }
 }
 
 [System.Serializable]
@@ -79,9 +84,14 @@ public class ServerSharePlayersMessage : Message
 [System.Serializable]
 public class ServerShareMovementMessage : Message
 {
+    // Players movements
     public float[] x;
     public float[] y;
     public float[] visorRotation;
+
+    // Monsters movements
+    public float[] mx;
+    public float[] my;
 
     public ServerShareMovementMessage()
     {

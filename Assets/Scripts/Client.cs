@@ -11,17 +11,21 @@ public class Client : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject projectilePrefab;
 
-    private int nbOfPlayers;
-    private int playerId;
+    public int nbOfPlayers;
+    public int playerId;
     private bool setPlayerId = false;
-    private GameObject[] players = new GameObject[4];
-    private Player player;
-    private Vector2[] startPlayersPositions = new Vector2[4];
+    public GameObject[] players = new GameObject[4];
+    public Player player;
 
+    private Vector2[] startPlayersPositions = new Vector2[4];
     private Vector2[] endPlayersPositions = new Vector2[4];
     private float[] startPlayersRotations = new float[4];
     private float[] endPlayersRotations = new float[4];
     private float[] timesStartedLerping = new float[4];
+
+    private Vector2[] startMonstersPositions;
+    private Vector2[] endMonstersPositions;
+    private float[] monstersTimesStartedLerping;
 
     private List<GameObject> projectiles = new List<GameObject>();
 
@@ -143,6 +147,23 @@ public class Client : MonoBehaviour
                     }
                 }
 
+                // Lerp server shared monsters movement
+                if (monstersTimesStartedLerping != null && monstersTimesStartedLerping.Length > 0)
+                {
+                    for (int i = 0; i < monstersTimesStartedLerping.Length; i++)
+                    {
+                        GameObject monster = spawner.monsters.transform.GetChild(i).gameObject; // TODO Remove monsters when killed
+                        Vector2 startServerPos = startMonstersPositions[i];
+                        Vector2 endServerPos = endMonstersPositions[i];
+                        float timeStartedLerping = monstersTimesStartedLerping[i];
+
+                        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                        //Position
+                        monster.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+
+                    }
+                }
+
                 break;
         }
 
@@ -221,6 +242,17 @@ public class Client : MonoBehaviour
 
                     }
 
+                    startMonstersPositions = new Vector2[shareMovementsMessage.mx.Length];
+                    endMonstersPositions = new Vector2[shareMovementsMessage.mx.Length];
+                    monstersTimesStartedLerping = new float[shareMovementsMessage.mx.Length];
+
+                    for (int i = 0; i < shareMovementsMessage.mx.Length; i++)
+                    {
+                        startMonstersPositions[i] = spawner.monsters.transform.GetChild(i).transform.position;
+                        endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
+                        monstersTimesStartedLerping[i] = Time.time;
+                    }
+
                 }
                 break;
             case MessageType.SERVER_SHARE_SHOOT:
@@ -244,14 +276,14 @@ public class Client : MonoBehaviour
                     spawner.ClearMonsters();
                     dungeonGeneration.Clear();
                     dungeonGeneration.Generate(ssm.seed);
-                    
+
                 }
                 break;
             case MessageType.SERVER_SHARE_MONSTERS_SPAWN:
                 {
                     ServerShareMonstersSpawnMessage ssmsm = (ServerShareMonstersSpawnMessage)c.received;
                     // If I'm not the one that has sent the request to spawn monsters
-                    if (ssmsm.playerId != playerId) 
+                    if (ssmsm.playerId != playerId)
                     {
                         spawner.SpawnMonsters(ssmsm.roomId, ssmsm.seed);
                     }
@@ -288,7 +320,6 @@ public class Client : MonoBehaviour
     public void SendPosition(GameObject player)
     {
         //Debug.LogError("Sending position !");
-        clientMovement.type = MessageType.MOVEMENT;
         clientMovement.x = player.transform.position.x;
         clientMovement.y = player.transform.position.y;
         clientMovement.visorRotation = player.GetComponent<Player>().visorRotation;

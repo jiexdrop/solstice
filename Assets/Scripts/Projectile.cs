@@ -19,7 +19,7 @@ public class Projectile : MonoBehaviour
         elapsed += Time.deltaTime;
 
         // transform.right = transform.forward for 2D
-        transform.position += transform.right * Time.deltaTime * 12; 
+        GetComponent<Rigidbody2D>().MovePosition(transform.position + transform.right * Time.deltaTime * 12); 
 
         if(elapsed > duration)
         {

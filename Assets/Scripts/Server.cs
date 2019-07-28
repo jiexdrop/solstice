@@ -11,9 +11,9 @@ public class Server : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject projectilePrefab;
 
-    private int nbOfPlayers;
-    private GameObject[] players = new GameObject[4];
-    private Player player;
+    public int nbOfPlayers;
+    public GameObject[] players = new GameObject[4];
+    public Player player;
 
     // Receive movement of client
     private Vector2[] startPlayersPositions = new Vector2[4];
@@ -94,7 +94,7 @@ public class Server : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.G))
         {
             // Testing
             seed = Random.Range(0, Int32.MaxValue);
@@ -107,13 +107,13 @@ public class Server : MonoBehaviour
         switch (state)
         {
             case GameState.STOP:
-                
+
                 break;
             case GameState.START:
 
                 break;
             case GameState.GAME:
-                
+
                 speed = joystick.InputVector * Time.deltaTime * 12;
 
                 // Get server player
@@ -238,7 +238,8 @@ public class Server : MonoBehaviour
 
         for (int i = 0; i < nbOfPlayers; i++)
         {
-            if (players[i] != null) {
+            if (players[i] != null)
+            {
                 newPlayerMessage.x[i] = players[i].transform.position.x;
                 newPlayerMessage.y[i] = players[i].transform.position.y;
             }
@@ -251,6 +252,7 @@ public class Server : MonoBehaviour
     {
         ServerShareMovementMessage shareMovementsMessage = new ServerShareMovementMessage();
 
+        // Player movements
         shareMovementsMessage.x = new float[nbOfPlayers];
         shareMovementsMessage.y = new float[nbOfPlayers];
         shareMovementsMessage.visorRotation = new float[nbOfPlayers];
@@ -260,6 +262,23 @@ public class Server : MonoBehaviour
             shareMovementsMessage.x[i] = players[i].transform.position.x;
             shareMovementsMessage.y[i] = players[i].transform.position.y;
             shareMovementsMessage.visorRotation[i] = players[i].GetComponent<Player>().visorRotation;
+        }
+
+        // Monsters movements
+        if (spawner.monsters != null)
+        {
+            shareMovementsMessage.mx = new float[spawner.monsters.transform.childCount];
+            shareMovementsMessage.my = new float[spawner.monsters.transform.childCount];
+
+            for (int i = 0; i < spawner.monsters.transform.childCount; i++)
+            {
+                shareMovementsMessage.mx[i] = spawner.monsters.transform.GetChild(i).transform.position.x;
+                shareMovementsMessage.my[i] = spawner.monsters.transform.GetChild(i).transform.position.y;
+            }
+        } else
+        {
+            shareMovementsMessage.mx = new float[0];
+            shareMovementsMessage.my = new float[0];
         }
 
         s.ServerSend(shareMovementsMessage);
@@ -312,7 +331,7 @@ public class Server : MonoBehaviour
         goToNextRoomMessage.x = new float[nbOfPlayers];
         goToNextRoomMessage.y = new float[nbOfPlayers];
 
-        for(int i = 0; i< nbOfPlayers; i++)
+        for (int i = 0; i < nbOfPlayers; i++)
         {
             goToNextRoomMessage.x[i] = players[i].transform.position.x;
             goToNextRoomMessage.y[i] = players[i].transform.position.y;

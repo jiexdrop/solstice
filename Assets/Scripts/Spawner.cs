@@ -10,23 +10,14 @@ public class Spawner : MonoBehaviour
     public GameObject slimePrefab;
 
     public Dictionary<int, Room> rooms;
-    public Dictionary<int, GameObject> monsters;
+    public GameObject monsters;
 
     private Server server;
     private Client client;
 
-    void Start()
-    {
-        monsters = new Dictionary<int, GameObject>();
-    }
-
     public void ClearMonsters()
     {
-        foreach (GameObject monster in monsters.Values)
-        {
-            Destroy(monster);
-        }
-        monsters.Clear();
+        Destroy(monsters);
     }
 
     public void SpawnMonsters(int roomId, int seed)
@@ -34,14 +25,31 @@ public class Spawner : MonoBehaviour
         Room room = rooms[roomId];
         //Debug.Log(string.Format("Spawn monsters at room{0} key{1} with seed{2}", room, roomId, seed));
         Random.InitState(seed);
-        GameObject roomMonsters = new GameObject(string.Format("Room {0} Monsters", roomId));
+        ClearMonsters();
+        monsters = new GameObject(string.Format("Room {0} Monsters", roomId));
         for (int i = 0; i < 10; i++)
         {
             int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
             int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
-            Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, roomMonsters.transform);
+            GameObject slime = Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monsters.transform);
+            // Ignore collisions between players and ennemies
+            if (server != null)
+            {
+                for(int j = 0; j<server.nbOfPlayers; j++)
+                {
+                    Physics2D.IgnoreCollision(slime.GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
+                }
+                slime.GetComponent<Monster>().isServer = true;
+            } 
+            if(client != null)
+            {
+                for (int j = 0; j < client.nbOfPlayers; j++)
+                {
+                    Physics2D.IgnoreCollision(slime.GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
+                }
+            }
         }
-        monsters[monsters.Count] = roomMonsters;
+
         room.spawnedMonsters = true;
         room.inside = true; // TODO Remove me
     }
