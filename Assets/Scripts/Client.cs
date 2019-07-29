@@ -150,9 +150,11 @@ public class Client : MonoBehaviour
                 // Lerp server shared monsters movement
                 if (monstersTimesStartedLerping != null && monstersTimesStartedLerping.Length > 0)
                 {
-                    for (int i = 0; i < monstersTimesStartedLerping.Length; i++)
+                    for (int i = 0; i < startMonstersPositions.Length; i++)
                     {
-                        GameObject monster = spawner.monsters.transform.GetChild(i).gameObject; // TODO Remove monsters when killed
+                        //Debug.Log("What do I have inside monsters ? " + spawner.monsters.transform.GetChild(i).gameObject.name);
+
+                        GameObject monster = spawner.monsters[i].gameObject; // TODO Remove monsters when killed
                         Vector2 startServerPos = startMonstersPositions[i];
                         Vector2 endServerPos = endMonstersPositions[i];
                         float timeStartedLerping = monstersTimesStartedLerping[i];
@@ -248,7 +250,9 @@ public class Client : MonoBehaviour
 
                     for (int i = 0; i < shareMovementsMessage.mx.Length; i++)
                     {
-                        startMonstersPositions[i] = spawner.monsters.transform.GetChild(i).transform.position;
+                        // If the monster exists set health and position from server
+                        startMonstersPositions[i] = spawner.monsters[i].transform.position;
+                        spawner.monsters[i].health = shareMovementsMessage.health[i];
                         endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
                         monstersTimesStartedLerping[i] = Time.time;
                     }

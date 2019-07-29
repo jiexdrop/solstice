@@ -10,14 +10,21 @@ public class Spawner : MonoBehaviour
     public GameObject slimePrefab;
 
     public Dictionary<int, Room> rooms;
-    public GameObject monsters;
+    public GameObject monstersParent;
+    public Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
+    public List<int> monstersToRemove = new List<int>();
 
     private Server server;
     private Client client;
 
     public void ClearMonsters()
     {
-        Destroy(monsters);
+        for (int i = 0; i < monsters.Count; i++)
+        {
+            Destroy(monsters[i].gameObject);
+        }
+        monsters.Clear();
+        Destroy(monstersParent);
     }
 
     public void SpawnMonsters(int roomId, int seed)
@@ -25,28 +32,32 @@ public class Spawner : MonoBehaviour
         Room room = rooms[roomId];
         //Debug.Log(string.Format("Spawn monsters at room{0} key{1} with seed{2}", room, roomId, seed));
         Random.InitState(seed);
-        ClearMonsters();
-        monsters = new GameObject(string.Format("Room {0} Monsters", roomId));
+        monstersParent = new GameObject(string.Format("Room {0} monsters", roomId));
+
         for (int i = 0; i < 10; i++)
         {
             int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
             int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
-            GameObject slime = Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monsters.transform);
+
+            monsters[i] = Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monstersParent.transform).GetComponent<Monster>();
+
             // Ignore collisions between players and ennemies
             if (server != null)
             {
-                for(int j = 0; j<server.nbOfPlayers; j++)
+                for (int j = 0; j < server.nbOfPlayers; j++)
                 {
-                    Physics2D.IgnoreCollision(slime.GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
+                    Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
                 }
-                slime.GetComponent<Monster>().isServer = true;
-            } 
-            if(client != null)
+                monsters[i].GetComponent<Monster>().isServer = true;
+                monsters[i].GetComponent<Monster>().monsters = monsters;
+            }
+            if (client != null)
             {
                 for (int j = 0; j < client.nbOfPlayers; j++)
                 {
-                    Physics2D.IgnoreCollision(slime.GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
+                    Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
                 }
+                monsters[i].GetComponent<Monster>().monsters = monsters;
             }
         }
 
@@ -83,6 +94,22 @@ public class Spawner : MonoBehaviour
             }
         }
 
+        // Remove monsters if toRemove set
+        foreach (KeyValuePair<int,Monster> m in monsters)
+        { 
+            if (m.Value.toRemove)
+            {
+                Destroy(m.Value.gameObject);
+                Destroy(m.Value);
+                monstersToRemove.Add(m.Key);
+            }
+        }
+
+        foreach(int i in monstersToRemove)
+        { 
+            monsters.Remove(i);
+        }
+        monstersToRemove.Clear();
     }
 
     public void SetServer(Server server)

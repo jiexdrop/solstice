@@ -11,6 +11,9 @@ public class Monster : MonoBehaviour
     private Vector3 randomMovement;
 
     public bool isServer;
+    public bool toRemove;
+
+    public Dictionary<int, Monster> monsters;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +35,11 @@ public class Monster : MonoBehaviour
 
             GetComponent<Rigidbody2D>().MovePosition(transform.position + randomMovement);
         }
+
+        if (health <= 0)
+        {
+            toRemove = true;
+        }
     }
 
 
@@ -41,11 +49,6 @@ public class Monster : MonoBehaviour
         {
             Debug.Log("Projectile");
             health--;
-            if(health <= 0)
-            {
-                Destroy(this.gameObject);
-                Destroy(this);
-            }
         }
     }
 }

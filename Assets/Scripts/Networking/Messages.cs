@@ -92,6 +92,7 @@ public class ServerShareMovementMessage : Message
     // Monsters movements
     public float[] mx;
     public float[] my;
+    public int[] health;
 
     public ServerShareMovementMessage()
     {
