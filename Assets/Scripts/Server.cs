@@ -264,18 +264,21 @@ public class Server : MonoBehaviour
             shareMovementsMessage.visorRotation[i] = players[i].GetComponent<Player>().visorRotation;
         }
 
-        shareMovementsMessage.mx = new float[spawner.monsters.Count];
-        shareMovementsMessage.my = new float[spawner.monsters.Count];
-        shareMovementsMessage.health = new int[spawner.monsters.Count];
-
         // Monsters movements
+        shareMovementsMessage.mx = new float[GameManager.MAX_MONSTERS];
+        shareMovementsMessage.my = new float[GameManager.MAX_MONSTERS];
+        shareMovementsMessage.health = new int[GameManager.MAX_MONSTERS];
         if (spawner.monsters != null)
         {
-            foreach(KeyValuePair<int, Monster> m in spawner.monsters) // TODO Key is not id
+
+            for (int i = 0; i < GameManager.MAX_MONSTERS; i++) 
             {
-                shareMovementsMessage.mx[m.Key] = m.Value.transform.position.x; 
-                shareMovementsMessage.my[m.Key] = m.Value.transform.position.y;
-                shareMovementsMessage.health[m.Key] = m.Value.health;
+                if (spawner.monsters[i] != null)
+                {
+                    shareMovementsMessage.mx[i] = spawner.monsters[i].transform.position.x;
+                    shareMovementsMessage.my[i] = spawner.monsters[i].transform.position.y;
+                    shareMovementsMessage.health[i] = spawner.monsters[i].health;
+                }
             }
         }
 

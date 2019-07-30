@@ -153,16 +153,17 @@ public class Client : MonoBehaviour
                     for (int i = 0; i < startMonstersPositions.Length; i++)
                     {
                         //Debug.Log("What do I have inside monsters ? " + spawner.monsters.transform.GetChild(i).gameObject.name);
+                        if (spawner.monsters[i] != null)
+                        {
+                            GameObject monster = spawner.monsters[i].gameObject; 
+                            Vector2 startServerPos = startMonstersPositions[i];
+                            Vector2 endServerPos = endMonstersPositions[i];
+                            float timeStartedLerping = monstersTimesStartedLerping[i];
 
-                        GameObject monster = spawner.monsters[i].gameObject; // TODO Remove monsters when killed
-                        Vector2 startServerPos = startMonstersPositions[i];
-                        Vector2 endServerPos = endMonstersPositions[i];
-                        float timeStartedLerping = monstersTimesStartedLerping[i];
-
-                        float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
-                        //Position
-                        monster.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
-
+                            float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
+                            //Position
+                            monster.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+                        }
                     }
                 }
 
@@ -244,17 +245,20 @@ public class Client : MonoBehaviour
 
                     }
 
-                    startMonstersPositions = new Vector2[shareMovementsMessage.mx.Length];
-                    endMonstersPositions = new Vector2[shareMovementsMessage.mx.Length];
-                    monstersTimesStartedLerping = new float[shareMovementsMessage.mx.Length];
+                    startMonstersPositions = new Vector2[GameManager.MAX_MONSTERS];
+                    endMonstersPositions = new Vector2[GameManager.MAX_MONSTERS];
+                    monstersTimesStartedLerping = new float[GameManager.MAX_MONSTERS];
 
-                    for (int i = 0; i < shareMovementsMessage.mx.Length; i++)
+                    for (int i = 0; i < GameManager.MAX_MONSTERS; i++)
                     {
                         // If the monster exists set health and position from server
-                        startMonstersPositions[i] = spawner.monsters[i].transform.position;
-                        spawner.monsters[i].health = shareMovementsMessage.health[i];
-                        endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
-                        monstersTimesStartedLerping[i] = Time.time;
+                        if (spawner.monsters[i] != null)
+                        {
+                            startMonstersPositions[i] = spawner.monsters[i].transform.position;
+                            spawner.monsters[i].health = shareMovementsMessage.health[i];
+                            endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
+                            monstersTimesStartedLerping[i] = Time.time;
+                        }
                     }
 
                 }

@@ -11,7 +11,7 @@ public class Spawner : MonoBehaviour
 
     public Dictionary<int, Room> rooms;
     public GameObject monstersParent;
-    public Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
+    public Monster[] monsters = new Monster[GameManager.MAX_MONSTERS];
     public List<int> monstersToRemove = new List<int>();
 
     private Server server;
@@ -19,11 +19,14 @@ public class Spawner : MonoBehaviour
 
     public void ClearMonsters()
     {
-        for (int i = 0; i < monsters.Count; i++)
+        for (int i = 0; i < monsters.Length; i++)
         {
-            Destroy(monsters[i].gameObject);
+            if (monsters[i] != null)
+            {
+                Destroy(monsters[i].gameObject);
+                monsters[i] = null;
+            }
         }
-        monsters.Clear();
         Destroy(monstersParent);
     }
 
@@ -32,6 +35,7 @@ public class Spawner : MonoBehaviour
         Room room = rooms[roomId];
         //Debug.Log(string.Format("Spawn monsters at room{0} key{1} with seed{2}", room, roomId, seed));
         Random.InitState(seed);
+        ClearMonsters();
         monstersParent = new GameObject(string.Format("Room {0} monsters", roomId));
 
         for (int i = 0; i < 10; i++)
@@ -49,7 +53,6 @@ public class Spawner : MonoBehaviour
                     Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
                 }
                 monsters[i].GetComponent<Monster>().isServer = true;
-                monsters[i].GetComponent<Monster>().monsters = monsters;
             }
             if (client != null)
             {
@@ -57,7 +60,6 @@ public class Spawner : MonoBehaviour
                 {
                     Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
                 }
-                monsters[i].GetComponent<Monster>().monsters = monsters;
             }
         }
 
@@ -95,21 +97,16 @@ public class Spawner : MonoBehaviour
         }
 
         // Remove monsters if toRemove set
-        foreach (KeyValuePair<int,Monster> m in monsters)
-        { 
-            if (m.Value.toRemove)
+        for (int i = 0; i< monsters.Length; i++)
+        {
+            if (monsters[i] != null && monsters[i].toRemove)
             {
-                Destroy(m.Value.gameObject);
-                Destroy(m.Value);
-                monstersToRemove.Add(m.Key);
+                Destroy(monsters[i].gameObject);
+                Destroy(monsters[i]);
+                monsters[i] = null;
             }
         }
 
-        foreach(int i in monstersToRemove)
-        { 
-            monsters.Remove(i);
-        }
-        monstersToRemove.Clear();
     }
 
     public void SetServer(Server server)

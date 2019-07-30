@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     public const float SHOOT_DURATION = 1f;
     public const int PACKET_LENGTH = 512;
     public const int PORT = 7345;
+    public const int MAX_MONSTERS = 12;
 
     public string IP = "127.0.0.1";
 

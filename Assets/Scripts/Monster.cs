@@ -13,8 +13,6 @@ public class Monster : MonoBehaviour
     public bool isServer;
     public bool toRemove;
 
-    public Dictionary<int, Monster> monsters;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -45,10 +43,12 @@ public class Monster : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Projectile")
+        if (isServer)
         {
-            Debug.Log("Projectile");
-            health--;
+            if (collision.gameObject.tag == "Projectile")
+            {
+                health--;
+            }
         }
     }
 }
