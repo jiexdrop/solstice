@@ -82,13 +82,11 @@ public class Spawner : MonoBehaviour
                             SpawnMonsters(room.Key, seed);
                             if (server != null)
                             {
-                                server.ShareSpawnMonsters(room.Key, 0, seed); // 0 server playerId
-                                server.TeleportPlayersTo(0, room.Key);
+                                server.ShareSpawnMonsters(room.Key, 0, seed, true); // 0 server playerId
                             }
                             if (client != null)
                             {
-                                client.SpawnMonsters(room.Key, seed);
-                                client.TeleportPlayersTo(client.playerId, room.Key);
+                                client.SpawnMonsters(room.Key, seed, true);
                             }
 
                             break;

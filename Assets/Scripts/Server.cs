@@ -32,7 +32,6 @@ public class Server : MonoBehaviour
 
     // Send movement of server
     MovementMessage serverMovement = new MovementMessage();
-    Queue<Message> orderedMessages = new Queue<Message>();
 
     private float elapsed;
     private bool sharingMovements;
@@ -138,15 +137,7 @@ public class Server : MonoBehaviour
                     }
                     else
                     {
-                        // Send messages that need to be ordered
-                        if (orderedMessages.Count > 0)
-                        {
-                            s.ServerSend(orderedMessages.Dequeue());
-                        }
-                        else
-                        {
-                            sharingMovements = true;
-                        }
+                        sharingMovements = true;
                     }
                 }
 
@@ -219,18 +210,15 @@ public class Server : MonoBehaviour
                 {
                     ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = (ClientShareMonstersSpawnMessage)s.received;
                     spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
-                    ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed);
-                }
-                break;
-            case MessageType.CLIENT_TELEPORT_PLAYERS:
-                {
-                    Debug.Log("SERVER RECEIVED PLAYER ASKING FOR TELEPORT MESSAGE");
-                    ClientTeleportPlayersMessage teleportPlayersMessage = (ClientTeleportPlayersMessage)s.received;
-                    // Teleport player a bit forward in the direction he entered;
-                    Player player = players[teleportPlayersMessage.playerId].GetComponent<Player>();
-                    Vector3 teleportPosition = player.transform.position + (player.visor.transform.right*2);
-                    players[0].transform.position = teleportPosition;
-                    TeleportPlayersTo(teleportPlayersMessage.playerId, teleportPlayersMessage.roomId);
+                    // Teleportation
+                    if (shareMonstersSpawnMessage.teleport)
+                    {
+                        Player player = players[shareMonstersSpawnMessage.playerId].GetComponent<Player>();
+                        Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 3);
+                        players[0].transform.position = teleportPosition;
+                    }
+
+                    ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed, shareMonstersSpawnMessage.teleport);
                 }
                 break;
         }
@@ -380,27 +368,19 @@ public class Server : MonoBehaviour
 
     }
 
-    public void ShareSpawnMonsters(int roomId, int playerId, int seed)
+    public void ShareSpawnMonsters(int roomId, int playerId, int seed, bool teleport)
     {
         ServerShareMonstersSpawnMessage shareMonstersSpawnMessage = new ServerShareMonstersSpawnMessage();
-        shareMonstersSpawnMessage.roomId = roomId;
-        shareMonstersSpawnMessage.playerId = playerId;
+
+        shareMonstersSpawnMessage.roomId = roomId; // the room where the monsters are spawned
+        shareMonstersSpawnMessage.playerId = playerId; // the player who spawns the monsters
         shareMonstersSpawnMessage.seed = seed;
+        shareMonstersSpawnMessage.teleport = teleport; // do I need to teleport the players to me
 
         sharingMovements = false;
 
-        orderedMessages.Enqueue(shareMonstersSpawnMessage);
+        s.ServerSend(shareMonstersSpawnMessage);
     }
 
-    public void TeleportPlayersTo(int playerId, int roomId)
-    {
-        ServerTeleportPlayersMessage teleportPlayersMessage = new ServerTeleportPlayersMessage();
-        teleportPlayersMessage.playerId = playerId;
-        teleportPlayersMessage.roomId = roomId;
 
-        sharingMovements = false;
-
-        Debug.LogError("SENDING TELEPORT MESSAGE FROM SERVER");
-        orderedMessages.Enqueue(teleportPlayersMessage);
-    }
 }

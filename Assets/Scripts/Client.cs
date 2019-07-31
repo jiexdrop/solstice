@@ -39,7 +39,6 @@ public class Client : MonoBehaviour
     private Vector3 endServerPos;
     // Send movement of client
     MovementMessage clientMovement = new MovementMessage();
-    Queue<Message> orderedMessages = new Queue<Message>();
 
     private float elapsed;
     private bool sharingMovements;
@@ -123,15 +122,7 @@ public class Client : MonoBehaviour
                     }
                     else
                     {
-                        // Send messages that need to be ordered
-                        if (orderedMessages.Count > 0)
-                        {
-                            c.ClientSend(orderedMessages.Dequeue());
-                        }
-                        else
-                        {
-                            sharingMovements = true;
-                        }
+                        sharingMovements = true;
                     }
                 }
 
@@ -304,23 +295,15 @@ public class Client : MonoBehaviour
                     if (ssmsm.playerId != playerId)
                     {
                         spawner.SpawnMonsters(ssmsm.roomId, ssmsm.seed);
+                        if (ssmsm.teleport)
+                        {
+                            Player player = players[ssmsm.playerId].GetComponent<Player>();
+                            Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 2);
+                            players[playerId].transform.position = teleportPosition;
+                        }
                     }
                 }
                 break;
-            case MessageType.SERVER_TELEPORT_PLAYERS:
-                {
-                    Debug.Log("RECIEVED CLIENT_TELEPORT FROM SERVER");
-                    ServerTeleportPlayersMessage stpm = (ServerTeleportPlayersMessage)c.received;
-                    if (playerId != stpm.playerId)
-                    {
-                        // Teleport player a bit forward in the direction he entered;
-                        Player player = players[stpm.playerId].GetComponent<Player>();
-                        Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 2);
-                        players[playerId].transform.position = teleportPosition;
-                    }
-                }
-                break;
-
         }
         c.received.OnRead();
 
@@ -375,28 +358,19 @@ public class Client : MonoBehaviour
         c.ClientSend(goToNextRoomMessage);
     }
 
-    public void SpawnMonsters(int roomId, int seed)
+    public void SpawnMonsters(int roomId, int seed, bool teleport)
     {
         ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = new ClientShareMonstersSpawnMessage();
 
         shareMonstersSpawnMessage.roomId = roomId; // the room where the monsters are spawned
         shareMonstersSpawnMessage.playerId = playerId; // the player who spawns the monsters
-        shareMonstersSpawnMessage.seed = seed; // the player who spawns the monsters
+        shareMonstersSpawnMessage.seed = seed;
+        shareMonstersSpawnMessage.teleport = teleport; // do I need to teleport the players to me
 
         sharingMovements = false;
 
-        orderedMessages.Enqueue(shareMonstersSpawnMessage);
+        c.ClientSend(shareMonstersSpawnMessage);
     }
 
-    public void TeleportPlayersTo(int playerId, int roomId)
-    {
-        ClientTeleportPlayersMessage teleportPlayersMessage = new ClientTeleportPlayersMessage();
-        teleportPlayersMessage.playerId = playerId;
-        teleportPlayersMessage.roomId = roomId;
-
-        sharingMovements = false;
-
-        orderedMessages.Enqueue(teleportPlayersMessage);
-    }
 
 }
