@@ -32,6 +32,7 @@ public class Server : MonoBehaviour
 
     // Send movement of server
     MovementMessage serverMovement = new MovementMessage();
+    Queue<Message> orderedMessages = new Queue<Message>();
 
     private float elapsed;
     private bool sharingMovements;
@@ -137,9 +138,18 @@ public class Server : MonoBehaviour
                     }
                     else
                     {
-                        sharingMovements = true;
+                        // Send messages that need to be ordered
+                        if (orderedMessages.Count > 0)
+                        {
+                            s.ServerSend(orderedMessages.Dequeue());
+                        }
+                        else
+                        {
+                            sharingMovements = true;
+                        }
                     }
                 }
+
 
                 // Server movement Lerp 
                 for (int i = 0; i < nbOfPlayers; i++)
@@ -168,36 +178,60 @@ public class Server : MonoBehaviour
         switch (s.received.type)
         {
             case MessageType.NONE:
+                {
+
+                }
                 break;
             case MessageType.CLIENT_NEW_PLAYER:
-                Debug.LogError("Recieved Start Server from client");
-                AddPlayer();
-                SharePlayers();
+                {
+                    Debug.LogError("Recieved Start Server from client");
+                    AddPlayer();
+                    SharePlayers();
+                }
                 break;
             case MessageType.MOVEMENT:
-                MovementMessage mm = (MovementMessage)s.received;
-                //Debug.Log("Movement from " + mm.playerId);
-                lastClientMovement = mm.playerId;
-                startPlayersPositions[lastClientMovement] = players[lastClientMovement].transform.position;
-                startPlayersRotations[lastClientMovement] = players[lastClientMovement].GetComponent<Player>().visorRotation;
-                endPlayersRotations[lastClientMovement] = mm.visorRotation;
-                endPlayersPositions[lastClientMovement] = new Vector3(mm.x, mm.y);
+                {
+                    MovementMessage mm = (MovementMessage)s.received;
+                    //Debug.Log("Movement from " + mm.playerId);
+                    lastClientMovement = mm.playerId;
+                    startPlayersPositions[lastClientMovement] = players[lastClientMovement].transform.position;
+                    startPlayersRotations[lastClientMovement] = players[lastClientMovement].GetComponent<Player>().visorRotation;
+                    endPlayersRotations[lastClientMovement] = mm.visorRotation;
+                    endPlayersPositions[lastClientMovement] = new Vector3(mm.x, mm.y);
 
-                timesStartedLerping[lastClientMovement] = Time.time;
+                    timesStartedLerping[lastClientMovement] = Time.time;
+                }
                 break;
             case MessageType.SHOOT:
-                ShootMessage sm = (ShootMessage)s.received;
-                ClientShoot(sm.playerId);
-                ShareShoots(sm.playerId);
+                {
+                    ShootMessage sm = (ShootMessage)s.received;
+                    ClientShoot(sm.playerId);
+                    ShareShoots(sm.playerId);
+                }
                 break;
             case MessageType.CLIENT_GO_TO_NEXT_ROOM:
-                ClientGoToNextRoomMessage goToNextRoomMessage = (ClientGoToNextRoomMessage)s.received;
-                GoToNextRoom(goToNextRoomMessage.seed);
+                {
+                    ClientGoToNextRoomMessage goToNextRoomMessage = (ClientGoToNextRoomMessage)s.received;
+                    GoToNextRoom(goToNextRoomMessage.seed);
+                }
                 break;
             case MessageType.CLIENT_SHARE_MONSTERS_SPAWN:
-                ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = (ClientShareMonstersSpawnMessage)s.received;
-                spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
-                ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed);
+                {
+                    ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = (ClientShareMonstersSpawnMessage)s.received;
+                    spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
+                    ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed);
+                }
+                break;
+            case MessageType.CLIENT_TELEPORT_PLAYERS:
+                {
+                    Debug.Log("SERVER RECEIVED PLAYER ASKING FOR TELEPORT MESSAGE");
+                    ClientTeleportPlayersMessage teleportPlayersMessage = (ClientTeleportPlayersMessage)s.received;
+                    // Teleport player a bit forward in the direction he entered;
+                    Player player = players[teleportPlayersMessage.playerId].GetComponent<Player>();
+                    Vector3 teleportPosition = player.transform.position + (player.visor.transform.right*2);
+                    players[0].transform.position = teleportPosition;
+                    TeleportPlayersTo(teleportPlayersMessage.playerId, teleportPlayersMessage.roomId);
+                }
                 break;
         }
         s.received.OnRead();
@@ -355,6 +389,18 @@ public class Server : MonoBehaviour
 
         sharingMovements = false;
 
-        s.ServerSend(shareMonstersSpawnMessage);
+        orderedMessages.Enqueue(shareMonstersSpawnMessage);
+    }
+
+    public void TeleportPlayersTo(int playerId, int roomId)
+    {
+        ServerTeleportPlayersMessage teleportPlayersMessage = new ServerTeleportPlayersMessage();
+        teleportPlayersMessage.playerId = playerId;
+        teleportPlayersMessage.roomId = roomId;
+
+        sharingMovements = false;
+
+        Debug.LogError("SENDING TELEPORT MESSAGE FROM SERVER");
+        orderedMessages.Enqueue(teleportPlayersMessage);
     }
 }

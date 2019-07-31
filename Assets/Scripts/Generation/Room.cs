@@ -56,6 +56,25 @@ public class Room
         }
     }
 
+    public void Close(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, int seed)
+    {
+        Random.InitState(seed);
+
+        TopWall(wallsTilemap, tiles[1], false);
+        BottomWall(wallsTilemap, tiles[1], false);
+        LeftWall(wallsTilemap, tiles[1], false);
+        RightWall(wallsTilemap, tiles[1], false);
+
+        Ground(backgroundTilemap, tiles);
+
+        switch (type)
+        {
+            case Room.Type.ENTRY:
+                DrawEntrance(backgroundTilemap, tiles);
+                break;
+        }
+    }
+
     public void Highlight(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, int seed)
     {
         Random.InitState(seed);

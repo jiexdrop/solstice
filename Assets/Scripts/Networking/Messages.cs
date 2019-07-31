@@ -20,6 +20,9 @@ public enum MessageType
     CLIENT_SHARE_MONSTERS_SPAWN,
     SERVER_SHARE_MONSTERS_SPAWN,
 
+    CLIENT_TELEPORT_PLAYERS,
+    SERVER_TELEPORT_PLAYERS,
+
     SHOOT,
     SERVER_SHARE_SHOOT,
 }
@@ -200,5 +203,31 @@ public class ClientShareMonstersSpawnMessage : Message
     }
 }
 
+[System.Serializable]
+public class ServerTeleportPlayersMessage : Message
+{
+    public int playerId;
+
+    public int roomId;
+
+    public ServerTeleportPlayersMessage()
+    {
+        type = MessageType.SERVER_TELEPORT_PLAYERS;
+    }
+}
+
+
+[System.Serializable]
+public class ClientTeleportPlayersMessage : Message
+{
+    public int playerId;
+
+    public int roomId;
+
+    public ClientTeleportPlayersMessage()
+    {
+        type = MessageType.CLIENT_TELEPORT_PLAYERS;
+    }
+}
 
 

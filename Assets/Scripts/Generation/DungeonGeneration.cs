@@ -211,7 +211,7 @@ public class DungeonGeneration : MonoBehaviour
 
     internal void HighlightRoom(Player player)
     {
-        foreach(Room room in rooms.Values)
+        foreach (Room room in rooms.Values)
         {
             bool playerIsInside = room.PlayerIsInside(player);
             if (playerIsInside)
@@ -229,7 +229,7 @@ public class DungeonGeneration : MonoBehaviour
                 room.entering = false;
             }
 
-            if(room.inside && !playerIsInside)
+            if (room.inside && !playerIsInside)
             {
                 room.inside = false;
                 room.Generate(backgroundTilemap, wallsTilemap, tiles, seed);

@@ -1221,6 +1221,13 @@ MonoBehaviour:
     type: 3}
   projectilePrefab: {fileID: 1604766832769618964, guid: 18e7a6996071b3f49b44ba3a3ebbdf36,
     type: 3}
+  nbOfPlayers: 0
+  players:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  player: {fileID: 0}
   joystick: {fileID: 959305634}
   shootButton: {fileID: 214082043}
   playerPanels:
@@ -1470,6 +1477,14 @@ MonoBehaviour:
     type: 3}
   projectilePrefab: {fileID: 1604766832769618964, guid: 18e7a6996071b3f49b44ba3a3ebbdf36,
     type: 3}
+  nbOfPlayers: 0
+  playerId: 0
+  players:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  player: {fileID: 0}
   joystick: {fileID: 959305634}
   shootButton: {fileID: 214082043}
   playerPanels:
@@ -1694,6 +1709,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slimePrefab: {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c,
     type: 3}
+  monstersParent: {fileID: 0}
+  monsters:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  monstersToRemove: 
 --- !u!4 &1424886050
 Transform:
   m_ObjectHideFlags: 0

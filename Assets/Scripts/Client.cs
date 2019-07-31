@@ -39,6 +39,7 @@ public class Client : MonoBehaviour
     private Vector3 endServerPos;
     // Send movement of client
     MovementMessage clientMovement = new MovementMessage();
+    Queue<Message> orderedMessages = new Queue<Message>();
 
     private float elapsed;
     private bool sharingMovements;
@@ -122,9 +123,18 @@ public class Client : MonoBehaviour
                     }
                     else
                     {
-                        sharingMovements = true;
+                        // Send messages that need to be ordered
+                        if (orderedMessages.Count > 0)
+                        {
+                            c.ClientSend(orderedMessages.Dequeue());
+                        }
+                        else
+                        {
+                            sharingMovements = true;
+                        }
                     }
                 }
+
 
                 // Lerp server shared movements
                 for (int i = 0; i < nbOfPlayers; i++)
@@ -155,7 +165,7 @@ public class Client : MonoBehaviour
                         //Debug.Log("What do I have inside monsters ? " + spawner.monsters.transform.GetChild(i).gameObject.name);
                         if (spawner.monsters[i] != null)
                         {
-                            GameObject monster = spawner.monsters[i].gameObject; 
+                            GameObject monster = spawner.monsters[i].gameObject;
                             Vector2 startServerPos = startMonstersPositions[i];
                             Vector2 endServerPos = endMonstersPositions[i];
                             float timeStartedLerping = monstersTimesStartedLerping[i];
@@ -297,6 +307,20 @@ public class Client : MonoBehaviour
                     }
                 }
                 break;
+            case MessageType.SERVER_TELEPORT_PLAYERS:
+                {
+                    Debug.Log("RECIEVED CLIENT_TELEPORT FROM SERVER");
+                    ServerTeleportPlayersMessage stpm = (ServerTeleportPlayersMessage)c.received;
+                    if (playerId != stpm.playerId)
+                    {
+                        // Teleport player a bit forward in the direction he entered;
+                        Player player = players[stpm.playerId].GetComponent<Player>();
+                        Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 2);
+                        players[playerId].transform.position = teleportPosition;
+                    }
+                }
+                break;
+
         }
         c.received.OnRead();
 
@@ -361,7 +385,18 @@ public class Client : MonoBehaviour
 
         sharingMovements = false;
 
-        c.ClientSend(shareMonstersSpawnMessage);
+        orderedMessages.Enqueue(shareMonstersSpawnMessage);
+    }
+
+    public void TeleportPlayersTo(int playerId, int roomId)
+    {
+        ClientTeleportPlayersMessage teleportPlayersMessage = new ClientTeleportPlayersMessage();
+        teleportPlayersMessage.playerId = playerId;
+        teleportPlayersMessage.roomId = roomId;
+
+        sharingMovements = false;
+
+        orderedMessages.Enqueue(teleportPlayersMessage);
     }
 
 }
