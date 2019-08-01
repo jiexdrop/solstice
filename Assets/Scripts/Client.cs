@@ -298,7 +298,7 @@ public class Client : MonoBehaviour
                         if (ssmsm.teleport)
                         {
                             Player player = players[ssmsm.playerId].GetComponent<Player>();
-                            Vector2 teleportPosition = new Vector2(player.transform.position.x, player.transform.position.y) + (player.GetRotatedVisorDirection(ssmsm.playerId) * 3);
+                            Vector2 teleportPosition = dungeonGeneration.GetPositionByPlayerDirection(playerId, ssmsm.roomId, player.GetVisorDirection());
                             players[playerId].transform.position = teleportPosition;
                         }
                     }

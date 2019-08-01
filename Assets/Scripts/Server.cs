@@ -215,7 +215,7 @@ public class Server : MonoBehaviour
                     if (shareMonstersSpawnMessage.teleport)
                     {
                         Player player = players[shareMonstersSpawnMessage.playerId].GetComponent<Player>();
-                        Vector2 teleportPosition = new Vector2(player.transform.position.x, player.transform.position.y) + (player.GetRotatedVisorDirection(shareMonstersSpawnMessage.playerId) * 3);
+                        Vector2 teleportPosition = dungeonGeneration.GetPositionByPlayerDirection(0, shareMonstersSpawnMessage.roomId, player.GetVisorDirection());
                         players[0].transform.position = teleportPosition;
                     }
 

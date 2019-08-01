@@ -275,6 +275,33 @@ public class DungeonGeneration : MonoBehaviour
         return true;
     }
 
+
+    public Vector2 GetPositionByPlayerDirection(int playerId, int roomId, Vector2 direction)
+    {
+        int entranceId = playerId;
+        if(entranceId > 2)
+        {
+            entranceId = Random.Range(0, 3);
+        }
+        if (direction.x == -1)
+        {
+            return rooms[roomId].rightEntrances[entranceId];
+        }
+        if(direction.x == 1)
+        {
+            return rooms[roomId].leftEntrances[entranceId];
+        }
+        if(direction.y == 1)
+        {
+            return rooms[roomId].bottomEntrances[entranceId];
+        }
+        if(direction.y == -1)
+        {
+            return rooms[roomId].topEntrances[entranceId];
+        }
+        return new Vector2(rooms[roomId].x, rooms[roomId].y);
+    }
+
     internal void Clear()
     {
         rooms.Clear();

@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine.Tilemaps;
 
-public class Room 
+public class Room
 {
     public enum Type
     {
@@ -12,6 +12,12 @@ public class Room
     }
 
     public bool[] openings = new bool[(int)Opening.COUNT];
+
+    public Vector2[] topEntrances = new Vector2[3];
+    public Vector2[] bottomEntrances = new Vector2[3];
+    public Vector2[] leftEntrances = new Vector2[3];
+    public Vector2[] rightEntrances = new Vector2[3];
+
     public int x;
     public int y;
     public int width;
@@ -41,12 +47,16 @@ public class Room
     {
         Random.InitState(seed);
 
-        TopWall(wallsTilemap, tiles[1], openings[(int)Opening.TOP]);
-        BottomWall(wallsTilemap, tiles[1], openings[(int)Opening.BOTTOM]);
-        LeftWall(wallsTilemap, tiles[1], openings[(int)Opening.LEFT]);
-        RightWall(wallsTilemap, tiles[1], openings[(int)Opening.RIGHT]);
-
         Ground(backgroundTilemap, tiles);
+
+        TopWall(wallsTilemap, tiles[1], openings[(int)Opening.TOP]);
+        TopEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.TOP]);
+        BottomWall(wallsTilemap, tiles[1], openings[(int)Opening.BOTTOM]);
+        BottomEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.BOTTOM]);
+        LeftWall(wallsTilemap, tiles[1], openings[(int)Opening.LEFT]);
+        LeftEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.LEFT]);
+        RightWall(wallsTilemap, tiles[1], openings[(int)Opening.RIGHT]);
+        RightEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.RIGHT]);
 
         switch (type)
         {
@@ -79,12 +89,16 @@ public class Room
     {
         Random.InitState(seed);
 
-        TopWall(wallsTilemap, tiles[10], openings[(int)Opening.TOP]);
-        BottomWall(wallsTilemap, tiles[10], openings[(int)Opening.BOTTOM]);
-        LeftWall(wallsTilemap, tiles[10], openings[(int)Opening.LEFT]);
-        RightWall(wallsTilemap, tiles[10], openings[(int)Opening.RIGHT]);
-
         Ground(backgroundTilemap, tiles);
+
+        TopWall(wallsTilemap, tiles[10], openings[(int)Opening.TOP]);
+        TopEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.TOP]);
+        BottomWall(wallsTilemap, tiles[10], openings[(int)Opening.BOTTOM]);
+        BottomEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.BOTTOM]);
+        LeftWall(wallsTilemap, tiles[10], openings[(int)Opening.LEFT]);
+        LeftEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.LEFT]);
+        RightWall(wallsTilemap, tiles[10], openings[(int)Opening.RIGHT]);
+        RightEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.RIGHT]);
 
         switch (type)
         {
@@ -125,6 +139,17 @@ public class Room
         }
     }
 
+    public void TopEntrances(Tilemap tilemap, TileBase tile, bool open)
+    {
+        int j = 0;
+        for (int i = x - 1; i <= x + 1; i++)
+        {
+            tilemap.SetTile(new Vector3Int(i, height / 2 + y - 1, 0), tile);
+            topEntrances[j] = new Vector2(i, height / 2 + y - 1);
+            j++;
+        }
+    }
+
     public void LeftWall(Tilemap tilemap, TileBase tile, bool open)
     {
         for (int i = -height / 2 + y; i < height / 2 + y; i++)
@@ -137,6 +162,17 @@ public class Room
         }
     }
 
+    public void LeftEntrances(Tilemap tilemap, TileBase tile, bool open)
+    {
+        int j = 0;
+        for (int i = y - 1; i <= y + 1; i++)
+        {
+            tilemap.SetTile(new Vector3Int(-width / 2 + 1 + x, i, 0), tile);
+            leftEntrances[j] = new Vector2(-width / 2 + 1 + x, i);
+            j++;
+        }
+    }
+
     public void RightWall(Tilemap tilemap, TileBase tile, bool open)
     {
         for (int i = -height / 2 + y; i <= height / 2 + y; i++)
@@ -146,6 +182,17 @@ public class Room
             {
                 tilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), null);
             }
+        }
+    }
+
+    public void RightEntrances(Tilemap tilemap, TileBase tile, bool open)
+    {
+        int j = 0;
+        for (int i = y - 1; i <= y + 1; i++)
+        {
+            tilemap.SetTile(new Vector3Int(width / 2 - 1 + x, i, 0), tile);
+            rightEntrances[j] = new Vector2(width / 2 - 1 + x, i);
+            j++;
         }
     }
 
@@ -162,11 +209,22 @@ public class Room
         }
     }
 
+    public void BottomEntrances(Tilemap tilemap, TileBase tile, bool open)
+    {
+        int j = 0;
+        for (int i = x - 1; i <= x + 1; i++)
+        {
+            tilemap.SetTile(new Vector3Int(i, -height / 2 + y + 1, 0), tile);
+            bottomEntrances[j] = new Vector2(i, -height / 2 + y + 1);
+            j++;
+        }
+    }
+
     internal void DrawEntrance(Tilemap tilemap, TileBase[] tiles)
     {
-        for (int i = x - 1; i < x + 1; i++)
+        for (int i = x - 1; i <= x + 1; i++)
         {
-            for (int j = y - 1; j < y + 1; j++)
+            for (int j = y - 1; j <= y + 1; j++)
             {
                 tilemap.SetTile(new Vector3Int(i, j, 0), tiles[7]);
             }
