@@ -131,6 +131,7 @@ public class Server : MonoBehaviour
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
                     dungeonGeneration.HighlightRoom(player);
+
                     if (sharingMovements)
                     {
                         ShareMovements();
@@ -214,7 +215,7 @@ public class Server : MonoBehaviour
                     if (shareMonstersSpawnMessage.teleport)
                     {
                         Player player = players[shareMonstersSpawnMessage.playerId].GetComponent<Player>();
-                        Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 3);
+                        Vector2 teleportPosition = new Vector2(player.transform.position.x, player.transform.position.y) + (player.GetRotatedVisorDirection(shareMonstersSpawnMessage.playerId) * 3);
                         players[0].transform.position = teleportPosition;
                     }
 

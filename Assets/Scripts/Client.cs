@@ -298,7 +298,7 @@ public class Client : MonoBehaviour
                         if (ssmsm.teleport)
                         {
                             Player player = players[ssmsm.playerId].GetComponent<Player>();
-                            Vector3 teleportPosition = player.transform.position + (player.visor.transform.right * 2);
+                            Vector2 teleportPosition = new Vector2(player.transform.position.x, player.transform.position.y) + (player.GetRotatedVisorDirection(ssmsm.playerId) * 3);
                             players[playerId].transform.position = teleportPosition;
                         }
                     }
