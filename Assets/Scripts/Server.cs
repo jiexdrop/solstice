@@ -104,6 +104,11 @@ public class Server : MonoBehaviour
             dungeonGeneration.Generate(seed);
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            panelsManager.ShowMenuPanel();
+        }
+
         switch (state)
         {
             case GameState.STOP:
@@ -383,5 +388,9 @@ public class Server : MonoBehaviour
         s.ServerSend(shareMonstersSpawnMessage);
     }
 
-
+    public void OnDestroy()
+    {
+        s.Close();
+        os.Close();
+    }
 }

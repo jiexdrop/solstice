@@ -17,14 +17,16 @@ public class UDPClient
 
     BinaryFormatter formatter = new BinaryFormatter();
 
+    Thread clientThread;
+
     public void Client(string address)
     {
         client = new UdpClient();
         epServer = new IPEndPoint(IPAddress.Parse(address), GameManager.PORT);
         client.Connect(epServer);
 
-        Thread thread = new Thread(new ThreadStart(ClientReceive));
-        thread.Start();
+        clientThread = new Thread(new ThreadStart(ClientReceive));
+        clientThread.Start();
     }
 
     private void ClientReceive()
@@ -53,5 +55,15 @@ public class UDPClient
     internal bool Connected()
     {
         return true;
+    }
+
+
+    internal void Close()
+    {
+        if (clientThread != null)
+        {
+            clientThread.Abort();
+            client.Close();
+        }
     }
 }

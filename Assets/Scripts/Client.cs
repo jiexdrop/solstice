@@ -82,6 +82,11 @@ public class Client : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            panelsManager.ShowMenuPanel();
+        }
+
         switch (state)
         {
             case GameState.STOP:
@@ -370,6 +375,11 @@ public class Client : MonoBehaviour
         sharingMovements = false;
 
         c.ClientSend(shareMonstersSpawnMessage);
+    }
+
+    public void OnDestroy()
+    {
+        c.Close();
     }
 
 

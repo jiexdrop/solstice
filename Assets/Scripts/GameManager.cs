@@ -43,7 +43,13 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        
+    }
 
+    public void Destroy()
+    {
+        Destroy(this.gameObject);
+        Destroy(this);
     }
 
     public void CreateClientGameScene(string ip)

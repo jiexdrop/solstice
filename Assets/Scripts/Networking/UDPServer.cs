@@ -18,12 +18,14 @@ public class UDPServer
 
     BinaryFormatter formatter = new BinaryFormatter();
 
+    Thread serverThread;
+
     public void Server(string address)
     {
         server = new UdpClient(GameManager.PORT);
 
-        Thread thread = new Thread(new ThreadStart(ServerReceive));
-        thread.Start();
+        serverThread = new Thread(new ThreadStart(ServerReceive));
+        serverThread.Start();
     }
 
     public void ServerSend(Message message)
@@ -55,6 +57,15 @@ public class UDPServer
             {
                 epClients.Add(remoteEP);
             }
+        }
+    }
+
+    internal void Close()
+    {
+        if (serverThread != null)
+        {
+            serverThread.Abort();
+            server.Close();
         }
     }
 }
