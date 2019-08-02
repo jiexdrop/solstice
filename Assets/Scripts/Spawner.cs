@@ -73,6 +73,45 @@ public class Spawner : MonoBehaviour
         {
             foreach (KeyValuePair<int, Room> room in rooms)
             {
+                switch (room.Value.type)
+                {
+                    case Room.Type.MONSTER:
+                        if (room.Value.playerEntered && !room.Value.killedMonsters)
+                        {
+                            if (server != null)
+                            {
+                                server.dungeonGeneration.CloseRoom(room.Key);
+                            }
+                            if(client != null)
+                            {
+                                client.dungeonGeneration.CloseRoom(room.Key);
+                            }
+                            bool allMonstersDied = true;
+                            for(int i = 0; i < monsters.Length; i++)
+                            {
+                                //Debug.Log(monsters[i]);
+                                if (monsters[i] != null) // If one monster is alive
+                                {
+                                    allMonstersDied = false; // Then they haven't all died
+                                }
+                            }
+
+                            // If all monsters died open room
+                            if (allMonstersDied)
+                            {
+                                room.Value.killedMonsters = true;
+                                if (server != null)
+                                {
+                                    server.dungeonGeneration.OpenRoom(room.Key);
+                                }
+                                if (client != null)
+                                {
+                                    client.dungeonGeneration.OpenRoom(room.Key);
+                                }
+                            }
+                        }
+                        break;
+                }
                 if (room.Value.inside && !room.Value.spawnedMonsters)
                 {
                     switch (room.Value.type)

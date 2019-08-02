@@ -131,7 +131,7 @@ public class Server : MonoBehaviour
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
                     dungeonGeneration.HighlightRoom(player);
-
+ 
                     if (sharingMovements)
                     {
                         ShareMovements();

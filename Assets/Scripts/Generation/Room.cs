@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEngine.Tilemaps;
+using System;
+using Random = UnityEngine.Random;
 
 public class Room
 {
@@ -24,8 +26,10 @@ public class Room
     public int height;
 
     public bool entering;
+    public bool playerEntered;
     public bool inside;
     public bool spawnedMonsters;
+    public bool killedMonsters;
 
     public Type type;
 
@@ -70,12 +74,20 @@ public class Room
     {
         Random.InitState(seed);
 
-        TopWall(wallsTilemap, tiles[1], false);
-        BottomWall(wallsTilemap, tiles[1], false);
-        LeftWall(wallsTilemap, tiles[1], false);
-        RightWall(wallsTilemap, tiles[1], false);
-
         Ground(backgroundTilemap, tiles);
+
+        TopWall(wallsTilemap, tiles[1], false);
+        TopDoor(wallsTilemap, tiles[7], openings[(int)Opening.TOP]);
+        TopEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.TOP]);
+        BottomWall(wallsTilemap, tiles[1], false);
+        BottomDoor(wallsTilemap, tiles[7], openings[(int)Opening.BOTTOM]);
+        BottomEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.BOTTOM]);
+        LeftWall(wallsTilemap, tiles[1], false);
+        LeftDoor(wallsTilemap, tiles[7], openings[(int)Opening.LEFT]);
+        LeftEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.LEFT]);
+        RightWall(wallsTilemap, tiles[1], false);
+        RightDoor(wallsTilemap, tiles[7], openings[(int)Opening.RIGHT]);
+        RightEntrances(backgroundTilemap, tiles[8], openings[(int)Opening.RIGHT]);
 
         switch (type)
         {
@@ -139,6 +151,17 @@ public class Room
         }
     }
 
+    private void TopDoor(Tilemap wallsTilemap, TileBase tile, bool open)
+    {
+        if (open)
+        {
+            for (int i = x - 1; i <= x + 1; i++)
+            {
+                wallsTilemap.SetTile(new Vector3Int(i, height / 2 + y, 0), tile);
+            }
+        }
+    }
+
     public void TopEntrances(Tilemap tilemap, TileBase tile, bool open)
     {
         int j = 0;
@@ -162,6 +185,17 @@ public class Room
         }
     }
 
+    private void LeftDoor(Tilemap wallsTilemap, TileBase tile, bool open)
+    {
+        if (open)
+        {
+            for (int i = y - 1; i <= y + 1; i++)
+            {
+                wallsTilemap.SetTile(new Vector3Int(-width/2 + x, i, 0), tile);
+            }
+        }
+    }
+
     public void LeftEntrances(Tilemap tilemap, TileBase tile, bool open)
     {
         int j = 0;
@@ -181,6 +215,17 @@ public class Room
             if (open && i >= y - 1 && i <= y + 1)
             {
                 tilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), null);
+            }
+        }
+    }
+
+    private void RightDoor(Tilemap wallsTilemap, TileBase tile, bool open)
+    {
+        if (open)
+        {
+            for (int i = y - 1; i <= y + 1; i++)
+            {
+                wallsTilemap.SetTile(new Vector3Int(width / 2 + x, i, 0), tile);
             }
         }
     }
@@ -209,6 +254,18 @@ public class Room
         }
     }
 
+
+    private void BottomDoor(Tilemap wallsTilemap, TileBase tile, bool open)
+    {
+        if (open)
+        {
+            for (int i = x - 1; i <= x + 1; i++)
+            {
+                wallsTilemap.SetTile(new Vector3Int(i, -height / 2 + y, 0), tile);
+            }
+        }
+    }
+
     public void BottomEntrances(Tilemap tilemap, TileBase tile, bool open)
     {
         int j = 0;
@@ -231,7 +288,7 @@ public class Room
         }
     }
 
-    internal bool PlayerIsInside(Player player)
+    public bool PlayerIsInside(Player player)
     {
         Vector3Int playerPos = new Vector3Int();
         playerPos.x = Mathf.RoundToInt(player.transform.position.x);
@@ -240,6 +297,27 @@ public class Room
         for (int i = -width / 2 + x; i <= width / 2 + x; i++)
         {
             for (int j = -height / 2 + y; j <= height / 2 + y; j++)
+            {
+                Vector3Int pos = new Vector3Int(i, j, 0);
+                if (playerPos.Equals(pos))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public bool PlayerEntered(Player player)
+    {
+        Vector3Int playerPos = new Vector3Int();
+        playerPos.x = Mathf.RoundToInt(player.transform.position.x);
+        playerPos.y = Mathf.RoundToInt(player.transform.position.y);
+
+        for (int i = -width / 2 + x + 1; i < width / 2 + x; i++)
+        {
+            for (int j = -height / 2 + y + 1; j < height / 2 + y; j++)
             {
                 Vector3Int pos = new Vector3Int(i, j, 0);
                 if (playerPos.Equals(pos))

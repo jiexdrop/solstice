@@ -209,11 +209,23 @@ public class DungeonGeneration : MonoBehaviour
         room.Generate(backgroundTilemap, wallsTilemap, tiles, seed);
     }
 
+    internal void CloseRoom(int key)
+    {
+        rooms[key].Close(backgroundTilemap, wallsTilemap, tiles, seed);
+    }
+
+    internal void OpenRoom(int key)
+    {
+        rooms[key].Generate(backgroundTilemap, wallsTilemap, tiles, seed);
+    }
+
     internal void HighlightRoom(Player player)
     {
         foreach (Room room in rooms.Values)
         {
             bool playerIsInside = room.PlayerIsInside(player);
+            room.playerEntered = room.PlayerEntered(player);
+
             if (playerIsInside)
             {
                 if (!room.inside)
