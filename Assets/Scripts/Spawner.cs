@@ -53,6 +53,8 @@ public class Spawner : MonoBehaviour
                     Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
                 }
                 monsters[i].GetComponent<Monster>().isServer = true;
+                monsters[i].GetComponent<Monster>().players = server.players;
+                monsters[i].GetComponent<Monster>().nbOfPlayers = server.nbOfPlayers;
             }
             if (client != null)
             {
@@ -60,6 +62,8 @@ public class Spawner : MonoBehaviour
                 {
                     Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
                 }
+                monsters[i].GetComponent<Monster>().players = client.players;
+                monsters[i].GetComponent<Monster>().nbOfPlayers = client.nbOfPlayers;
             }
         }
 
