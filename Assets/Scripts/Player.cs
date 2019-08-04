@@ -19,6 +19,11 @@ public class Player : MonoBehaviour
 
     public bool isPlayed; // I'm currently being played or do my values come from the server
 
+    public bool died;
+
+    public Server server;
+    public Client client;
+
     void Start()
     {
         center = transform.GetChild(0).gameObject;
@@ -48,7 +53,7 @@ public class Player : MonoBehaviour
         }
 
         if ((visor.transform.rotation.eulerAngles.z >= 315 && visor.transform.rotation.eulerAngles.z < 360)
-            || (visor.transform.rotation.eulerAngles.z < 45 && visor.transform.rotation.eulerAngles.z >=0))
+            || (visor.transform.rotation.eulerAngles.z < 45 && visor.transform.rotation.eulerAngles.z >= 0))
         {
             // RIGHT
             return new Vector2(1, 0);
@@ -81,7 +86,7 @@ public class Player : MonoBehaviour
         }
 
         angle = angle * Mathf.Deg2Rad;
-        visorRotation.x = (visorRotation.x * Mathf.Cos(angle)) - (visorRotation.y  * Mathf.Sin(angle));
+        visorRotation.x = (visorRotation.x * Mathf.Cos(angle)) - (visorRotation.y * Mathf.Sin(angle));
         visorRotation.y = (visorRotation.x * Mathf.Sin(angle)) + (visorRotation.y * Mathf.Cos(angle));
 
         return visorRotation;
@@ -101,6 +106,27 @@ public class Player : MonoBehaviour
         center.transform.rotation = Quaternion.Euler(0, 0, visorRotation);
     }
 
+    public void SetDied()
+    {
+        died = true;
+        if (isPlayed)
+        {
+            if(server != null)
+            {
+                server.ShareDeath(0);
+            }
+
+            if(client != null)
+            {
+                client.ShareDeath(client.playerId);
+            }
+            Camera.main.transform.parent = transform.parent;
+        }
+        animator.enabled = false;
+        GetComponent<SpriteRenderer>().color = Color.black;
+        transform.rotation = Quaternion.Euler(0, 0, 90);
+    }
+
     public void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "MonsterProjectile")
@@ -110,6 +136,10 @@ public class Player : MonoBehaviour
             {
                 health--;
                 healthBar.value = health;
+                if (health < 0)
+                {
+                    SetDied();
+                }
             }
         }
     }

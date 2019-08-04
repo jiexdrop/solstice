@@ -22,6 +22,9 @@ public enum MessageType
 
     SHOOT,
     SERVER_SHARE_SHOOT,
+
+    CLIENT_DIE,
+    SERVER_DIE,
 }
 
 public enum GameState
@@ -204,5 +207,25 @@ public class ClientShareMonstersSpawnMessage : Message
     }
 }
 
+[System.Serializable]
+public class ClientDieMessage : Message
+{
+    public int playerId;
 
+    public ClientDieMessage()
+    {
+        type = MessageType.CLIENT_DIE;
+    }
+}
+
+[System.Serializable]
+public class ServerDieMessage : Message
+{
+    public int playerId;
+
+    public ServerDieMessage()
+    {
+        type = MessageType.SERVER_DIE;
+    }
+}
 

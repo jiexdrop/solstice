@@ -124,7 +124,7 @@ public class Server : MonoBehaviour
                 player.animator.SetBool("Walking", false);
 
                 // Get server player
-                if (speed.magnitude > 0)
+                if (speed.magnitude > 0 && !player.died)
                 {
                     //player.transform.position += speed;
                     Rigidbody2D playerRb2D = player.GetComponent<Rigidbody2D>();
@@ -195,13 +195,14 @@ public class Server : MonoBehaviour
                 break;
             case MessageType.CLIENT_NEW_PLAYER:
                 {
-                    Debug.LogError("Recieved Start Server from client");
+                    Debug.LogError("Received Start Server from client");
                     AddPlayer();
                     SharePlayers();
                 }
                 break;
             case MessageType.MOVEMENT:
                 {
+                    // Received movement from client
                     MovementMessage mm = (MovementMessage)s.received;
                     //Debug.Log("Movement from " + mm.playerId);
                     lastClientMovement = mm.playerId;
@@ -241,6 +242,15 @@ public class Server : MonoBehaviour
                     ShareSpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.playerId, shareMonstersSpawnMessage.seed, shareMonstersSpawnMessage.teleport);
                 }
                 break;
+            case MessageType.CLIENT_DIE:
+                {
+                    ClientDieMessage clientDieMessage = (ClientDieMessage)s.received;
+
+                    players[clientDieMessage.playerId].GetComponent<Player>().SetDied();
+
+                    ShareDeath(clientDieMessage.playerId);
+                }
+                break;
         }
         s.received.OnRead();
 
@@ -263,6 +273,7 @@ public class Server : MonoBehaviour
         if (player == null) // Set server player 
         {
             player = players[0].GetComponent<Player>();
+            player.server = this;
             player.isPlayed = true;
             // Set the healthbar of the server player
             player.healthBar = healthBar;
@@ -405,6 +416,17 @@ public class Server : MonoBehaviour
         sharingMovements = false;
 
         s.ServerSend(shareMonstersSpawnMessage);
+    }
+
+    public void ShareDeath(int playerId)
+    {
+        ServerDieMessage serverDieMessage = new ServerDieMessage();
+
+        serverDieMessage.playerId = playerId;
+
+        sharingMovements = false;
+
+        s.ServerSend(serverDieMessage);
     }
 
     public void OnDestroy()

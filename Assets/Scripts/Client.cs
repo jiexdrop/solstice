@@ -202,6 +202,8 @@ public class Client : MonoBehaviour
                     // Define player and camera only once at the start of the game
                     player = players[playerId].GetComponent<Player>();
 
+                    player.client = this;
+
                     // Set camera as a child of the player
                     Camera.main.transform.parent = player.transform;
 
@@ -327,6 +329,16 @@ public class Client : MonoBehaviour
                     }
                 }
                 break;
+            case MessageType.SERVER_DIE:
+                {
+                    ServerDieMessage sdm = (ServerDieMessage)c.received;
+
+                    if (sdm.playerId != playerId)
+                    {
+                        players[sdm.playerId].GetComponent<Player>().SetDied();
+                    }
+                }
+                break;
         }
         c.received.OnRead();
 
@@ -393,6 +405,17 @@ public class Client : MonoBehaviour
         sharingMovements = false;
 
         c.ClientSend(shareMonstersSpawnMessage);
+    }
+
+    public void ShareDeath(int playerId)
+    {
+        ClientDieMessage dieMessage = new ClientDieMessage();
+
+        dieMessage.playerId = playerId;
+
+        sharingMovements = false;
+
+        c.ClientSend(dieMessage);
     }
 
     public void OnDestroy()
