@@ -25,9 +25,10 @@ public class Server : MonoBehaviour
 
     private List<GameObject> projectiles = new List<GameObject>();
 
-    [Header("Controls")]
+    [Header("Player UI and Controls")]
     public VirtualJoystick joystick;
     public Button shootButton;
+    public Slider healthBar;
     private Vector2 speed = new Vector2();
 
     // Send movement of server
@@ -255,12 +256,17 @@ public class Server : MonoBehaviour
             players[nbOfPlayers] = Instantiate(playerPrefab, randomPosition, Quaternion.identity);
             // Lobby
             playerPanels[nbOfPlayers].SetActivePlayer(true);
+
             nbOfPlayers++;
         }
 
         if (player == null) // Set server player 
         {
             player = players[0].GetComponent<Player>();
+            player.isPlayed = true;
+            // Set the healthbar of the server player
+            player.healthBar = healthBar;
+            player.healthBar.value = player.health;
             // Set camera as a child of the player
             Camera.main.transform.parent = player.transform;
         }

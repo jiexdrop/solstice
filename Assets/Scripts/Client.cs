@@ -29,9 +29,10 @@ public class Client : MonoBehaviour
 
     private List<GameObject> projectiles = new List<GameObject>();
 
-    [Header("Controls")]
+    [Header("Player UI and Controls")]
     public VirtualJoystick joystick;
     public Button shootButton;
+    public Slider healthBar;
     private Vector2 speed = new Vector2();
 
     // Receive movement of server
@@ -203,6 +204,12 @@ public class Client : MonoBehaviour
 
                     // Set camera as a child of the player
                     Camera.main.transform.parent = player.transform;
+
+                    player.isPlayed = true;
+
+                    // Set the healthbar of the client player
+                    player.healthBar = healthBar;
+                    player.healthBar.value = player.health;
 
                     state = GameState.GAME;
                 }

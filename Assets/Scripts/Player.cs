@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class Player : MonoBehaviour
     public Animator animator;
 
     public float visorRotation;
+
+    [Header("Health")]
+    public Slider healthBar;
+    public int health = 10;
+
+    public bool isPlayed; // I'm currently being played or do my values come from the server
 
     void Start()
     {
@@ -92,5 +99,18 @@ public class Player : MonoBehaviour
     {
         this.visorRotation = visorRotation;
         center.transform.rotation = Quaternion.Euler(0, 0, visorRotation);
+    }
+
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "MonsterProjectile")
+        {
+            Destroy(collision.gameObject);
+            if (isPlayed)
+            {
+                health--;
+                healthBar.value = health;
+            }
+        }
     }
 }
