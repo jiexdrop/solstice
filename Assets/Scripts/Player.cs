@@ -8,17 +8,16 @@ public class Player : MonoBehaviour
     public GameObject center;
     public GameObject visor;
 
+    public Animator animator;
+
     public float visorRotation;
 
     void Start()
     {
         center = transform.GetChild(0).gameObject;
         visor = center.transform.GetChild(0).gameObject;
-    }
 
-    void Update()
-    {
-
+        animator = GetComponent<Animator>();
     }
 
     public Vector2 GetVisorDirection()

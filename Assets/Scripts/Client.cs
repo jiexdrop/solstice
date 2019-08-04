@@ -107,12 +107,14 @@ public class Client : MonoBehaviour
             case GameState.GAME:
 
                 speed = joystick.InputVector * Time.deltaTime * 12;
+                player.animator.SetBool("Walking", false);
                 if (speed.magnitude > 0)
                 {
                     //player.transform.position += speed;
                     Rigidbody2D playerRb2D = player.GetComponent<Rigidbody2D>();
                     playerRb2D.MovePosition(playerRb2D.position + speed);
                     player.SetRotation(joystick.InputVector);
+                    player.animator.SetBool("Walking", true);
                 }
 
                 elapsed += Time.deltaTime;
@@ -150,6 +152,15 @@ public class Client : MonoBehaviour
                         // Rotation of the visor
                         float lerpedRotation = Mathf.LerpAngle(startServerRot, endServerRot, lerpPercentage);
                         players[i].GetComponent<Player>().SetRotation(lerpedRotation);
+                        
+                        // If we havent moved then we are not walking
+                        if(Vector2.Distance(startServerPos, endServerPos) < 0.1f)
+                        {
+                            players[i].GetComponent<Player>().animator.SetBool("Walking", false);
+                        } else
+                        {
+                            players[i].GetComponent<Player>().animator.SetBool("Walking", true);
+                        }
                     }
                 }
 
