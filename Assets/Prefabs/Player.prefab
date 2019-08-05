@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6336006747589877428}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -98,7 +98,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {fileID: 0}
   visor: {fileID: 0}
+  animator: {fileID: 0}
   visorRotation: 0
+  healthBar: {fileID: 0}
+  health: 10
+  isPlayed: 0
+  died: 0
+  server: {fileID: 0}
+  client: {fileID: 0}
 --- !u!50 &8656424616374944273
 Rigidbody2D:
   serializedVersion: 4

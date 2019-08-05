@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -141,6 +142,11 @@ public class Player : MonoBehaviour
                     SetDied();
                 }
             }
+        }
+
+        if(collision.gameObject.tag == "Chest")
+        {
+            collision.gameObject.GetComponent<Chest>().OpenChest();
         }
     }
 }

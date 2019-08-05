@@ -8,6 +8,8 @@ TagManager:
   - Client
   - PlayerProjectile
   - MonsterProjectile
+  - Walls
+  - Chest
   layers:
   - Default
   - TransparentFX

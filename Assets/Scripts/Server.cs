@@ -105,6 +105,18 @@ public class Server : MonoBehaviour
             dungeonGeneration.Generate(seed);
         }
 
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            //Testing
+            for (int i = 0; i < spawner.monsters.Length; i++)
+            {
+                if (spawner.monsters[i] != null)
+                {
+                    spawner.monsters[i].GetComponent<Monster>().health = 0;
+                }
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             panelsManager.ShowMenuPanel();
@@ -139,7 +151,7 @@ public class Server : MonoBehaviour
                 {
                     elapsed = elapsed % GameManager.FREQUENCY;
                     dungeonGeneration.HighlightRoom(player);
- 
+
                     if (sharingMovements)
                     {
                         ShareMovements();
@@ -329,7 +341,7 @@ public class Server : MonoBehaviour
         if (spawner.monsters != null)
         {
 
-            for (int i = 0; i < GameManager.MAX_MONSTERS; i++) 
+            for (int i = 0; i < GameManager.MAX_MONSTERS; i++)
             {
                 if (spawner.monsters[i] != null)
                 {
@@ -345,12 +357,15 @@ public class Server : MonoBehaviour
 
     public void ServerShoot()
     {
-        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = player.center.transform.rotation;
-        projectiles.Add(p);
-        ShareShoots(0);
+        if (!player.died)
+        {
+            GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+            Projectile projectile = p.GetComponent<Projectile>();
+            projectile.duration = GameManager.SHOOT_DURATION;
+            projectile.transform.rotation = player.center.transform.rotation;
+            projectiles.Add(p);
+            ShareShoots(0);
+        }
     }
 
     public void ClientShoot(int playerId)

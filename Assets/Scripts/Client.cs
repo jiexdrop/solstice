@@ -109,7 +109,7 @@ public class Client : MonoBehaviour
 
                 speed = joystick.InputVector * Time.deltaTime * 12;
                 player.animator.SetBool("Walking", false);
-                if (speed.magnitude > 0)
+                if (speed.magnitude > 0 && !player.died)
                 {
                     //player.transform.position += speed;
                     Rigidbody2D playerRb2D = player.GetComponent<Rigidbody2D>();
@@ -346,16 +346,19 @@ public class Client : MonoBehaviour
 
     public void ClientShoot()
     {
-        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = player.center.transform.rotation;
-        projectiles.Add(p);
+        if (!player.died)
+        {
+            GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+            Projectile projectile = p.GetComponent<Projectile>();
+            projectile.duration = GameManager.SHOOT_DURATION;
+            projectile.transform.rotation = player.center.transform.rotation;
+            projectiles.Add(p);
 
-        ShootMessage shoot = new ShootMessage();
-        shoot.playerId = playerId;
-        shoot.duration = GameManager.SHOOT_DURATION;
-        c.ClientSend(shoot);
+            ShootMessage shoot = new ShootMessage();
+            shoot.playerId = playerId;
+            shoot.duration = GameManager.SHOOT_DURATION;
+            c.ClientSend(shoot);
+        }
     }
 
     public void ServerShoot(int playerId)

@@ -10,7 +10,8 @@ public class Room
     {
         ENTRY,
         PORTAL,
-        MONSTER
+        MONSTER,
+        CHEST
     }
 
     public bool[] openings = new bool[(int)Opening.COUNT];
@@ -67,6 +68,9 @@ public class Room
             case Room.Type.ENTRY:
                 DrawEntrance(backgroundTilemap, tiles);
                 break;
+            case Room.Type.CHEST:
+                DrawChest();
+                break;
         }
     }
 
@@ -116,6 +120,9 @@ public class Room
         {
             case Room.Type.ENTRY:
                 DrawEntrance(backgroundTilemap, tiles);
+                break;
+            case Room.Type.CHEST:
+                DrawChest();
                 break;
         }
     }
@@ -286,6 +293,11 @@ public class Room
                 tilemap.SetTile(new Vector3Int(i, j, 0), tiles[7]);
             }
         }
+    }
+
+    private void DrawChest()
+    {
+        
     }
 
     public bool PlayerIsInside(Player player)

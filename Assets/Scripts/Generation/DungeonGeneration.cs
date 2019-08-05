@@ -13,8 +13,11 @@ public class DungeonGeneration : MonoBehaviour
 
     [Header("Prefabs")]
     public GameObject portalPrefab;
+    public GameObject chestPrefab;
 
     public GameObject portal;
+
+    public Dictionary<Room, GameObject> chests;
 
     // Tilemap 0 = Dark
     // Tilemap 1 = Wall
@@ -72,19 +75,28 @@ public class DungeonGeneration : MonoBehaviour
             room.openings[makeOpening] = true;
         }
 
+        chests = new Dictionary<Room, GameObject>();
         int limit = 2;
-        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, seed, limit, 0);
+        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, chests, seed, limit, 0);
 
+        if (chests.ContainsKey(lastRoom)) Destroy(chests[lastRoom]);
         lastRoom.type = Room.Type.PORTAL;
-        portal = Instantiate(portalPrefab, new Vector3Int(lastRoom.x, lastRoom.y, 0), Quaternion.identity);
+        portal = Instantiate(portalPrefab, new Vector3(lastRoom.x + 0.5f, lastRoom.y + 0.5f, 0), Quaternion.identity);
         portal.GetComponent<Portal>().SetServer(server);
         portal.GetComponent<Portal>().SetClient(client);
 
     }
 
-    private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, int seed, int limit, int depth)
+    private void GenerateRecursively(Tilemap backgroundTilemap, Tilemap wallsTilemap, TileBase[] tiles, Room room, Dictionary<Room, GameObject> chests, int seed, int limit, int depth)
     {
         room.Generate(backgroundTilemap, wallsTilemap, tiles, seed);
+        switch (room.type)
+        {
+            case Room.Type.CHEST:
+                chests[room] = Instantiate(chestPrefab, new Vector3(room.x + 0.5f, room.y + 0.5f, 0), Quaternion.identity);
+                break;
+        }
+
         rooms[rooms.Count] = room;
         if (depth > maxDepth)
         {
@@ -105,7 +117,15 @@ public class DungeonGeneration : MonoBehaviour
                                 int randomWidth = Random.Range(5, 15) * 2;
                                 int randomHeight = Random.Range(5, 15) * 2;
                                 Room nextRoom = new Room(road.x, road.y + (room.height - ((room.height - randomHeight) / 2)), randomWidth, randomHeight);
-                                nextRoom.type = Room.Type.MONSTER;
+                                // Randomly generate chests
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    nextRoom.type = Room.Type.MONSTER;
+                                }
+                                else
+                                {
+                                    nextRoom.type = Room.Type.CHEST;
+                                }
                                 nextRoom.openings[(int)Opening.BOTTOM] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
@@ -113,7 +133,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, seed, --limit, ++depth);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
                             }
@@ -124,7 +144,15 @@ public class DungeonGeneration : MonoBehaviour
                                 int randomWidth = Random.Range(5, 15) * 2;
                                 int randomHeight = Random.Range(5, 15) * 2;
                                 Room nextRoom = new Room(road.x, road.y - (room.height - ((room.height - randomHeight) / 2)), randomWidth, randomHeight);
-                                nextRoom.type = Room.Type.MONSTER;
+                                // Randomly generate chests
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    nextRoom.type = Room.Type.MONSTER;
+                                }
+                                else
+                                {
+                                    nextRoom.type = Room.Type.CHEST;
+                                }
                                 nextRoom.openings[(int)Opening.TOP] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
@@ -132,7 +160,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, seed, --limit, ++depth);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
                             }
@@ -144,7 +172,15 @@ public class DungeonGeneration : MonoBehaviour
                                 int randomHeight = Random.Range(5, 15) * 2;
                                 road.horizontal = true;
                                 Room nextRoom = new Room(road.x - (room.width - ((room.width - randomWidth) / 2)), road.y, randomWidth, randomHeight);
-                                nextRoom.type = Room.Type.MONSTER;
+                                // Randomly generate chests
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    nextRoom.type = Room.Type.MONSTER;
+                                }
+                                else
+                                {
+                                    nextRoom.type = Room.Type.CHEST;
+                                }
                                 nextRoom.openings[(int)Opening.RIGHT] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
@@ -152,7 +188,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, seed, --limit, ++depth);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
                             }
@@ -164,7 +200,15 @@ public class DungeonGeneration : MonoBehaviour
                                 int randomHeight = Random.Range(5, 15) * 2;
                                 road.horizontal = true;
                                 Room nextRoom = new Room(road.x + (room.width - ((room.width - randomWidth) / 2)), road.y, randomWidth, randomHeight);
-                                nextRoom.type = Room.Type.MONSTER;
+                                // Randomly generate chests
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    nextRoom.type = Room.Type.MONSTER;
+                                }
+                                else
+                                {
+                                    nextRoom.type = Room.Type.CHEST;
+                                }
                                 nextRoom.openings[(int)Opening.LEFT] = true;
                                 if (IsSpaceForRoom(backgroundTilemap, wallsTilemap, nextRoom, 2))
                                 {
@@ -172,7 +216,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
-                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, seed, --limit, ++depth);
+                                        GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
                             }
@@ -291,7 +335,7 @@ public class DungeonGeneration : MonoBehaviour
     public Vector2 GetPositionByPlayerDirection(int playerId, int roomId, Vector2 direction)
     {
         int entranceId = playerId;
-        if(entranceId > 2)
+        if (entranceId > 2)
         {
             entranceId = Random.Range(0, 3);
         }
@@ -299,15 +343,15 @@ public class DungeonGeneration : MonoBehaviour
         {
             return rooms[roomId].rightEntrances[entranceId];
         }
-        if(direction.x == 1)
+        if (direction.x == 1)
         {
             return rooms[roomId].leftEntrances[entranceId];
         }
-        if(direction.y == 1)
+        if (direction.y == 1)
         {
             return rooms[roomId].bottomEntrances[entranceId];
         }
-        if(direction.y == -1)
+        if (direction.y == -1)
         {
             return rooms[roomId].topEntrances[entranceId];
         }
@@ -321,6 +365,11 @@ public class DungeonGeneration : MonoBehaviour
         backgroundTilemap.ClearAllTiles();
         wallsTilemap.ClearAllTiles();
 
+        foreach (GameObject chest in chests.Values)
+        {
+            Destroy(chest);
+        }
+        chests.Clear();
         Destroy(portal);
     }
 
