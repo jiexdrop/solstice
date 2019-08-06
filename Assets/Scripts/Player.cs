@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
 
     [Header("Health")]
     public Slider healthBar;
-    public int health = 10;
+    public int health = GameManager.MAX_HEALTH;
 
     public bool isPlayed; // I'm currently being played or do my values come from the server
 
@@ -61,6 +61,20 @@ public class Player : MonoBehaviour
         }
 
         return new Vector2(1, 0);
+    }
+
+    internal void UsePickable(Pickable pickable)
+    {
+        switch (pickable.type)
+        {
+            case Pickable.Type.POTION:
+                IncrementHealth(3);
+                break;
+
+            case Pickable.Type.WEAPON:
+
+                break;
+        }
     }
 
     public Vector2 GetRotatedVisorDirection(int playerId)
@@ -126,6 +140,18 @@ public class Player : MonoBehaviour
         animator.enabled = false;
         GetComponent<SpriteRenderer>().color = Color.black;
         transform.rotation = Quaternion.Euler(0, 0, 90);
+    }
+
+    public void IncrementHealth(int points)
+    {
+        if (health + points < GameManager.MAX_HEALTH)
+        {
+            health += points;
+        } else
+        {
+            health = GameManager.MAX_HEALTH;
+        }
+        healthBar.value = health;
     }
 
     public void OnCollisionEnter2D(Collision2D collision)

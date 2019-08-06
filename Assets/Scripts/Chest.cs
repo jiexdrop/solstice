@@ -8,6 +8,17 @@ public class Chest : MonoBehaviour
     public Sprite openSprite;
     public Sprite closedSprite;
 
+    public GameObject pickablePrefab;
+
+    public bool opened;
+
+    public Room room;
+
+    public Dictionary<Room, GameObject> pickables;
+
+    public Server server;
+    public Client client;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,8 +36,15 @@ public class Chest : MonoBehaviour
         
     }
 
-    internal void OpenChest()
+    public void OpenChest()
     {
-        GetComponent<SpriteRenderer>().sprite = openSprite;
+        if (!opened)
+        {
+            GetComponent<SpriteRenderer>().sprite = openSprite;
+            pickables[room] = Instantiate(pickablePrefab, transform.position, Quaternion.identity);
+            pickables[room].GetComponent<Pickable>().server = server;
+            pickables[room].GetComponent<Pickable>().client = client;
+            opened = true;
+        }
     }
 }

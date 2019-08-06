@@ -95,6 +95,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   openSprite: {fileID: 21300024, guid: c4e68ee036dd38d43a4777ead6dbed55, type: 3}
   closedSprite: {fileID: 21300012, guid: c4e68ee036dd38d43a4777ead6dbed55, type: 3}
+  pickablePrefab: {fileID: 4171876975738066481, guid: 1f6b118f4d9812c478ea3daf92518f1b,
+    type: 3}
 --- !u!61 &6319245369248874713
 BoxCollider2D:
   m_ObjectHideFlags: 0

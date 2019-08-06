@@ -18,6 +18,7 @@ public class DungeonGeneration : MonoBehaviour
     public GameObject portal;
 
     public Dictionary<Room, GameObject> chests;
+    public Dictionary<Room, GameObject> pickables;
 
     // Tilemap 0 = Dark
     // Tilemap 1 = Wall
@@ -76,6 +77,7 @@ public class DungeonGeneration : MonoBehaviour
         }
 
         chests = new Dictionary<Room, GameObject>();
+        pickables = new Dictionary<Room, GameObject>();
         int limit = 2;
         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, chests, seed, limit, 0);
 
@@ -94,6 +96,11 @@ public class DungeonGeneration : MonoBehaviour
         {
             case Room.Type.CHEST:
                 chests[room] = Instantiate(chestPrefab, new Vector3(room.x + 0.5f, room.y + 0.5f, 0), Quaternion.identity);
+                chests[room].GetComponent<Chest>().room = room;
+                chests[room].GetComponent<Chest>().server = server;
+                chests[room].GetComponent<Chest>().client = client;
+                chests[room].GetComponent<Chest>().pickables = pickables;
+
                 break;
         }
 
@@ -370,6 +377,13 @@ public class DungeonGeneration : MonoBehaviour
             Destroy(chest);
         }
         chests.Clear();
+
+        foreach (GameObject pickable in pickables.Values)
+        {
+            Destroy(pickable);
+        }
+        pickables.Clear();
+
         Destroy(portal);
     }
 

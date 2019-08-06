@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public const int PACKET_LENGTH = 512;
     public const int PORT = 7345;
     public const int MAX_MONSTERS = 10;
+    public const int MAX_HEALTH = 10;
+    public const int MIN_HEALTH = 0;
 
     public string IP = "127.0.0.1";
 
