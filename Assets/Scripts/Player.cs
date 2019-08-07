@@ -25,6 +25,10 @@ public class Player : MonoBehaviour
     public Server server;
     public Client client;
 
+    [Header("Weapon")]
+    public float frequency = 0.2f;    
+    public int dammage = 1;    
+
     void Start()
     {
         center = transform.GetChild(0).gameObject;
@@ -67,12 +71,23 @@ public class Player : MonoBehaviour
     {
         switch (pickable.type)
         {
-            case Pickable.Type.POTION:
+            case Pickable.Type.HEALTH_POTION:
                 IncrementHealth(3);
                 break;
+            case Pickable.Type.ENERYGY_POTION:
+                IncrementHealth(1);
+                break;
+            case Pickable.Type.POISON_POTION:
+                health--; // Don't dysplay you've been poisoned
+                break;
 
-            case Pickable.Type.WEAPON:
-
+            case Pickable.Type.KATANA:
+                frequency = 1f;
+                dammage = 3;
+                break;
+            case Pickable.Type.PISTOL:
+                frequency = 0.2f;
+                dammage = 1;
                 break;
         }
     }

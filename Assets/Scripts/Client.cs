@@ -31,7 +31,7 @@ public class Client : MonoBehaviour
 
     [Header("Player UI and Controls")]
     public VirtualJoystick joystick;
-    public Button shootButton;
+    public ShootButton shootButton;
     public Slider healthBar;
     private Vector2 speed = new Vector2();
 
@@ -41,8 +41,10 @@ public class Client : MonoBehaviour
     // Send movement of client
     MovementMessage clientMovement = new MovementMessage();
 
-    private float elapsed;
+    private float movementElapsed;
+    private float shootingElapsed;
     private bool sharingMovements;
+    private bool shooting;
 
     UDPClient c = new UDPClient();
 
@@ -67,7 +69,8 @@ public class Client : MonoBehaviour
             //Debug.LogError("Client connected with ip: " + GameManager.Instance.IP);
             c.Client(GameManager.Instance.IP);
 
-            shootButton.onClick.AddListener(ClientShoot);
+            shootButton.onDown.AddListener(StartShooting);
+            shootButton.onUp.AddListener(StopShooting);
 
             playButton.gameObject.SetActive(false);
 
@@ -118,11 +121,23 @@ public class Client : MonoBehaviour
                     player.animator.SetBool("Walking", true);
                 }
 
-                elapsed += Time.deltaTime;
+                movementElapsed += Time.deltaTime;
+                shootingElapsed += Time.deltaTime;
 
-                if (elapsed >= GameManager.FREQUENCY)
+                // Shooting
+                if (!player.died && shooting)
                 {
-                    elapsed = elapsed % GameManager.FREQUENCY;
+                    if (shootingElapsed >= player.frequency)
+                    {
+                        shootingElapsed = shootingElapsed % player.frequency;
+                        ClientShoot();
+                    }
+                }
+
+                // Movement
+                if (movementElapsed >= GameManager.FREQUENCY)
+                {
+                    movementElapsed = movementElapsed % GameManager.FREQUENCY;
                     dungeonGeneration.HighlightRoom(player);
                     if (sharingMovements)
                     {
@@ -153,12 +168,13 @@ public class Client : MonoBehaviour
                         // Rotation of the visor
                         float lerpedRotation = Mathf.LerpAngle(startServerRot, endServerRot, lerpPercentage);
                         players[i].GetComponent<Player>().SetRotation(lerpedRotation);
-                        
+
                         // If we havent moved then we are not walking
-                        if(Vector2.Distance(startServerPos, endServerPos) < 0.1f)
+                        if (Vector2.Distance(startServerPos, endServerPos) < 0.1f)
                         {
                             players[i].GetComponent<Player>().animator.SetBool("Walking", false);
-                        } else
+                        }
+                        else
                         {
                             players[i].GetComponent<Player>().animator.SetBool("Walking", true);
                         }
@@ -344,22 +360,32 @@ public class Client : MonoBehaviour
 
     }
 
+    public void StartShooting()
+    {
+        shootingElapsed = 0;
+        shooting = true;
+    }
+
     public void ClientShoot()
     {
-        if (!player.died)
-        {
-            GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
-            Projectile projectile = p.GetComponent<Projectile>();
-            projectile.duration = GameManager.SHOOT_DURATION;
-            projectile.transform.rotation = player.center.transform.rotation;
-            projectiles.Add(p);
+        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+        Projectile projectile = p.GetComponent<Projectile>();
+        projectile.duration = GameManager.SHOOT_DURATION;
+        projectile.transform.rotation = player.center.transform.rotation;
+        projectiles.Add(p);
 
-            ShootMessage shoot = new ShootMessage();
-            shoot.playerId = playerId;
-            shoot.duration = GameManager.SHOOT_DURATION;
-            c.ClientSend(shoot);
-        }
+        ShootMessage shoot = new ShootMessage();
+        shoot.playerId = playerId;
+        shoot.duration = GameManager.SHOOT_DURATION;
+        c.ClientSend(shoot);
+
     }
+
+    public void StopShooting()
+    {
+        shooting = false;
+    }
+
 
     public void ServerShoot(int playerId)
     {

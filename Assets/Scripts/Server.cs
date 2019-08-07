@@ -27,15 +27,17 @@ public class Server : MonoBehaviour
 
     [Header("Player UI and Controls")]
     public VirtualJoystick joystick;
-    public Button shootButton;
+    public ShootButton shootButton;
     public Slider healthBar;
     private Vector2 speed = new Vector2();
 
     // Send movement of server
     MovementMessage serverMovement = new MovementMessage();
 
-    private float elapsed;
+    private float movementElapsed;
+    private float shootingElapsed;
     private bool sharingMovements;
+    private bool shooting;
 
     // This server shares movement data
     UDPServer s = new UDPServer();
@@ -65,7 +67,8 @@ public class Server : MonoBehaviour
 
             AddPlayer();
 
-            shootButton.onClick.AddListener(ServerShoot);
+            shootButton.onDown.AddListener(StartShooting);
+            shootButton.onUp.AddListener(StopShooting);
 
             playButton.onClick.AddListener(StartGame);
 
@@ -145,11 +148,24 @@ public class Server : MonoBehaviour
                     player.animator.SetBool("Walking", true);
                 }
 
-                elapsed += Time.deltaTime;
+                movementElapsed += Time.deltaTime;
+                shootingElapsed += Time.deltaTime;
 
-                if (elapsed >= GameManager.FREQUENCY)
+                // Shooting
+                if (!player.died && shooting)
                 {
-                    elapsed = elapsed % GameManager.FREQUENCY;
+                    Debug.Log(player.frequency);
+                    if (shootingElapsed >= player.frequency)
+                    {
+                        shootingElapsed = shootingElapsed % player.frequency;
+                        ServerShoot();
+                    }
+                }
+
+                // Movement
+                if (movementElapsed >= GameManager.FREQUENCY)
+                {
+                    movementElapsed = movementElapsed % GameManager.FREQUENCY;
                     dungeonGeneration.HighlightRoom(player);
 
                     if (sharingMovements)
@@ -355,17 +371,25 @@ public class Server : MonoBehaviour
         s.ServerSend(shareMovementsMessage);
     }
 
+    public void StartShooting()
+    {
+        shootingElapsed = 0;
+        shooting = true;
+    }
+
     public void ServerShoot()
     {
-        if (!player.died)
-        {
-            GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
-            Projectile projectile = p.GetComponent<Projectile>();
-            projectile.duration = GameManager.SHOOT_DURATION;
-            projectile.transform.rotation = player.center.transform.rotation;
-            projectiles.Add(p);
-            ShareShoots(0);
-        }
+        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+        Projectile projectile = p.GetComponent<Projectile>();
+        projectile.duration = GameManager.SHOOT_DURATION;
+        projectile.transform.rotation = player.center.transform.rotation;
+        projectiles.Add(p);
+        ShareShoots(0);
+    }
+
+    public void StopShooting()
+    {
+        shooting = false;
     }
 
     public void ClientShoot(int playerId)

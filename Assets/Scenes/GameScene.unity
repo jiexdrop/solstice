@@ -179,7 +179,6 @@ MonoBehaviour:
   chestPrefab: {fileID: 5885173871719475013, guid: ab7b86a5734945f40b5f638f92667f62,
     type: 3}
   portal: {fileID: 0}
-  chests: []
   tiles:
   - {fileID: 11400000, guid: 10a612c13db4dad49a14fb7f925750cf, type: 2}
   - {fileID: 11400000, guid: 5430e243214a8494fbf673473ab61912, type: 2}
@@ -677,7 +676,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 214082041}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 54eac9faf815342438e116998ff9876f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -704,7 +703,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 214082044}
+  m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []

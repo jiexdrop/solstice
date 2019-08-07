@@ -6,8 +6,13 @@ public class Pickable : MonoBehaviour
 {
     public enum Type
     {
-        POTION,
-        WEAPON
+        HEALTH_POTION,
+        POISON_POTION,
+        ENERYGY_POTION,
+        PISTOL,
+        KATANA,
+
+        COUNT
     }
 
     private Vector2 upPosition;
@@ -22,12 +27,17 @@ public class Pickable : MonoBehaviour
 
     private GameObject followPlayer;
 
+    public List<Sprite> sprites;
+
     // Start is called before the first frame update
     void Start()
     {
         upPosition = transform.position;
         upPosition.y += 0.5f;
-        this.type = Type.POTION;
+        type = (Type)Random.Range(0, (int)Type.COUNT);
+
+        GetComponent<SpriteRenderer>().sprite = sprites[(int)type];
+        
     }
 
     // Update is called once per frame

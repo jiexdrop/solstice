@@ -106,6 +106,8 @@ MonoBehaviour:
   died: 0
   server: {fileID: 0}
   client: {fileID: 0}
+  frequency: 0.2
+  dammage: 1
 --- !u!50 &8656424616374944273
 Rigidbody2D:
   serializedVersion: 4
