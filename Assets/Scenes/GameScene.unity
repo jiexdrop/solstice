@@ -709,6 +709,16 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  onDown:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  onUp:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
 --- !u!114 &214082044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2343,8 +2353,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13f6c81dd92ae1d4996423d1436fa398, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slimePrefab: {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c,
-    type: 3}
+  monsterPrefabs:
+  - {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c, type: 3}
+  - {fileID: 4564508714913364031, guid: 7c359f5ea803f4e4b9b8ba9bce61df3c, type: 3}
   monstersParent: {fileID: 0}
   monsters:
   - {fileID: 0}

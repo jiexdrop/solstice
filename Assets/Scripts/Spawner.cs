@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class Spawner : MonoBehaviour
 {
     [Header("Monster Prefabs")]
-    public GameObject slimePrefab;
+    public GameObject[] monsterPrefabs;
 
     public Dictionary<int, Room> rooms;
     public GameObject monstersParent;
@@ -42,8 +42,9 @@ public class Spawner : MonoBehaviour
         {
             int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
             int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
+            int wichMonster = Random.Range(0, monsterPrefabs.Length);
 
-            monsters[i] = Instantiate(slimePrefab, new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monstersParent.transform).GetComponent<Monster>();
+            monsters[i] = Instantiate(monsterPrefabs[wichMonster], new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monstersParent.transform).GetComponent<Monster>();
 
             // Ignore collisions between players and ennemies
             if (server != null)

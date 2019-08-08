@@ -20,14 +20,17 @@ public class Portal : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
-        if (server != null)
+        if (collision.gameObject.tag == "Player")
         {
-            server.GoToNextRoom();
-        }
+            if (server != null)
+            {
+                server.GoToNextRoom();
+            }
 
-        if(client !=null){
-            client.GoToNextRoom();
+            if (client != null)
+            {
+                client.GoToNextRoom();
+            }
         }
     }
 }

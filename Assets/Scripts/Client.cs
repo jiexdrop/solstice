@@ -368,7 +368,7 @@ public class Client : MonoBehaviour
 
     public void ClientShoot()
     {
-        GameObject p = Instantiate(projectilePrefab, player.visor.transform.position, Quaternion.identity);
+        GameObject p = Instantiate(projectilePrefab, player.shootExit.transform.position, Quaternion.identity);
         Projectile projectile = p.GetComponent<Projectile>();
         projectile.duration = GameManager.SHOOT_DURATION;
         projectile.transform.rotation = player.center.transform.rotation;

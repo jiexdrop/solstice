@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
 {
     public GameObject center;
     public GameObject visor;
+    public GameObject shootExit;
 
     public Animator animator;
 
@@ -33,6 +34,7 @@ public class Player : MonoBehaviour
     {
         center = transform.GetChild(0).gameObject;
         visor = center.transform.GetChild(0).gameObject;
+        shootExit = visor.transform.GetChild(0).gameObject;
 
         animator = GetComponent<Animator>();
     }
@@ -84,10 +86,12 @@ public class Player : MonoBehaviour
             case Pickable.Type.KATANA:
                 frequency = 1f;
                 dammage = 3;
+                visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 break;
             case Pickable.Type.PISTOL:
                 frequency = 0.2f;
                 dammage = 1;
+                visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 break;
         }
     }
