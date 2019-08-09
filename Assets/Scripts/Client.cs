@@ -127,6 +127,7 @@ public class Client : MonoBehaviour
                 // Shooting
                 if (!player.died && shooting)
                 {
+                    player.AnimateShooting(shootingElapsed);
                     if (shootingElapsed >= player.frequency)
                     {
                         shootingElapsed = shootingElapsed % player.frequency;

@@ -128,6 +128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {fileID: 0}
   visor: {fileID: 0}
+  shootExit: {fileID: 0}
   animator: {fileID: 0}
   visorRotation: 0
   healthBar: {fileID: 0}
@@ -138,6 +139,33 @@ MonoBehaviour:
   client: {fileID: 0}
   frequency: 0.2
   dammage: 1
+  type: 3
+  recoilCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2.223499
+      outSlope: 2.223499
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.04660099
+    - serializedVersion: 3
+      time: 1
+      value: 0.00093476847
+      inSlope: -2.7053494
+      outSlope: -2.7053494
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.041883647
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  backwardsVisorPosition: {x: 0, y: 0, z: 0}
+  saveVisorPosition: {x: 0, y: 0, z: 0}
 --- !u!50 &8656424616374944273
 Rigidbody2D:
   serializedVersion: 4

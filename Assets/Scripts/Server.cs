@@ -154,7 +154,7 @@ public class Server : MonoBehaviour
                 // Shooting
                 if (!player.died && shooting)
                 {
-                    Debug.Log(player.frequency);
+                    player.AnimateShooting(shootingElapsed);
                     if (shootingElapsed >= player.frequency)
                     {
                         shootingElapsed = shootingElapsed % player.frequency;

@@ -11,6 +11,7 @@ public class Pickable : MonoBehaviour
         ENERYGY_POTION,
         PISTOL,
         KATANA,
+        BOW,
 
         COUNT
     }
