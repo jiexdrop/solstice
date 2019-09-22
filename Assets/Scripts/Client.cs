@@ -384,6 +384,7 @@ public class Client : MonoBehaviour
 
     public void StopShooting()
     {
+        player.StopShooting();
         shooting = false;
     }
 

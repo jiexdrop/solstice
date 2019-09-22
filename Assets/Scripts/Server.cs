@@ -125,6 +125,16 @@ public class Server : MonoBehaviour
             panelsManager.ShowMenuPanel();
         }
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StartShooting();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            StopShooting();
+        }
+
         switch (state)
         {
             case GameState.STOP:
@@ -207,7 +217,6 @@ public class Server : MonoBehaviour
                             players[i].GetComponent<Player>().animator.SetBool("Walking", true);
                         }
                     }
-
                 }
 
                 break;
@@ -389,6 +398,7 @@ public class Server : MonoBehaviour
 
     public void StopShooting()
     {
+        player.StopShooting();
         shooting = false;
     }
 

@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
         shootExit = visor.transform.GetChild(0).gameObject;
 
         animator = GetComponent<Animator>();
+        recoilCurve.postWrapMode = WrapMode.Loop;
     }
 
     public Vector2 GetVisorDirection()
@@ -90,6 +91,7 @@ public class Player : MonoBehaviour
                 dammage = 3;
                 visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 visor.transform.localRotation = Quaternion.identity;
+                shootExit.transform.localPosition = new Vector3(0.6f, 0.0f, 0);
                 type = pickable.type;
                 break;
             case Pickable.Type.PISTOL:
@@ -97,6 +99,7 @@ public class Player : MonoBehaviour
                 dammage = 1;
                 visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 visor.transform.localRotation = Quaternion.identity;
+                shootExit.transform.localPosition = new Vector3(0.3f, 0.07f, 0);
                 type = pickable.type;
                 break;
             case Pickable.Type.BOW:
@@ -104,6 +107,7 @@ public class Player : MonoBehaviour
                 dammage = 2;
                 visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 visor.transform.localRotation = Quaternion.Euler(0, 0, -45);
+                shootExit.transform.localPosition = new Vector3(0.3f, 0.3f, 0);
                 type = pickable.type;
                 break;
         }
@@ -181,25 +185,33 @@ public class Player : MonoBehaviour
     {
         if(shootingElapsed == Time.deltaTime)
         {
-            Debug.Log("Start animate shooting");
             saveVisorPosition = new Vector3(0.7f, 0, 0);
-            backwardsVisorPosition = visor.transform.position - (visor.transform.right*0.25f);
         }
+        backwardsVisorPosition = visor.transform.localPosition * 0.25f;
+        
+        //Debug.Log(recoilCurve.Evaluate(Time.time * 1/frequency));
+        //Debug.Log("shootingElapsed " + shootingElapsed);
 
         switch (type)
         {
             case Pickable.Type.PISTOL:
-                visor.transform.position = Vector2.Lerp(visor.transform.position, backwardsVisorPosition, recoilCurve.Evaluate(shootingElapsed));
+                {
+                    float lerpPercent = recoilCurve.Evaluate(Time.time * 1 / frequency);
+                    visor.transform.localPosition = Vector2.Lerp(saveVisorPosition, backwardsVisorPosition, lerpPercent);
+                }
                 break;
             case Pickable.Type.BOW:
-                visor.transform.position = Vector2.Lerp(visor.transform.position, backwardsVisorPosition, recoilCurve.Evaluate(shootingElapsed));
+                {
+                    float lerpPercent = recoilCurve.Evaluate(Time.time * 1 / frequency);
+                    visor.transform.localPosition = Vector2.Lerp(saveVisorPosition, backwardsVisorPosition, lerpPercent);
+                }
                 break;
         }
 
-        if (shootingElapsed >= frequency - Time.deltaTime)
+        if (shootingElapsed >= frequency)
         {
             Debug.Log("End animate shooting");
-            visor.transform.localPosition = saveVisorPosition;
+            //visor.transform.localPosition = saveVisorPosition;
         }
     }
 
@@ -235,5 +247,10 @@ public class Player : MonoBehaviour
         {
             collision.gameObject.GetComponent<Chest>().OpenChest();
         }
+    }
+
+    public void StopShooting()
+    {
+        visor.transform.localPosition = saveVisorPosition;
     }
 }
