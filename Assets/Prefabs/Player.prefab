@@ -145,7 +145,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.007358551
       inSlope: 2.223499
       outSlope: 2.223499
       tangentMode: 0
@@ -154,7 +154,7 @@ MonoBehaviour:
       outWeight: 0.04660099
     - serializedVersion: 3
       time: 1
-      value: 0.00093476847
+      value: 0.0082933195
       inSlope: -2.7053494
       outSlope: -2.7053494
       tangentMode: 0
@@ -164,6 +164,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  shooting: 0
+  shootingElapsed: 0
   backwardsVisorPosition: {x: 0, y: 0, z: 0}
   saveVisorPosition: {x: 0, y: 0, z: 0}
 --- !u!50 &8656424616374944273

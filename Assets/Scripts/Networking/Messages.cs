@@ -20,9 +20,6 @@ public enum MessageType
     CLIENT_SHARE_MONSTERS_SPAWN,
     SERVER_SHARE_MONSTERS_SPAWN,
 
-    SHOOT,
-    SERVER_SHARE_SHOOT,
-
     CLIENT_DIE,
     SERVER_DIE,
 }
@@ -59,6 +56,7 @@ public class MovementMessage : Message
     public float x;
     public float y;
     public float visorRotation;
+    public bool shooting;
 
     public MovementMessage()
     {
@@ -91,11 +89,11 @@ public class ServerShareMovementMessage : Message
     public float[] x;
     public float[] y;
     public float[] visorRotation;
+    public bool[] shooting;
 
     // Monsters movements
     public float[] mx;
     public float[] my;
-    public int[] health;
 
     public ServerShareMovementMessage()
     {
@@ -110,29 +108,6 @@ public class ClientNewPlayerMessage : Message
     public ClientNewPlayerMessage()
     {
         type = MessageType.CLIENT_NEW_PLAYER;
-    }
-}
-
-[System.Serializable]
-public class ShootMessage : Message
-{
-    public int playerId;
-    public float duration;
-
-    public ShootMessage()
-    {
-        type = MessageType.SHOOT;
-    }
-}
-
-[System.Serializable]
-public class ServerShareShootMessage : Message
-{
-    public int playerId;
-
-    public ServerShareShootMessage()
-    {
-        type = MessageType.SERVER_SHARE_SHOOT;
     }
 }
 

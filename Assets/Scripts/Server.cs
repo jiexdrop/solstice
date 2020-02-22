@@ -159,14 +159,16 @@ public class Server : MonoBehaviour
                 }
 
                 movementElapsed += Time.deltaTime;
-                shootingElapsed += Time.deltaTime;
 
                 // Shooting
-                if (!player.died && shooting)
+                if (player.shooting)
                 {
-                    player.AnimateShooting(shootingElapsed);
-                    if (shootingElapsed >= player.frequency)
+                    player.AnimateShooting(player.shootingElapsed);
+                    //Debug.Log(player.shootingElapsed);
+
+                    if (player.shootingElapsed >= player.frequency)
                     {
+                        player.shootingElapsed = player.shootingElapsed % player.frequency;
                         shootingElapsed = shootingElapsed % player.frequency;
                         ServerShoot();
                     }
@@ -189,32 +191,44 @@ public class Server : MonoBehaviour
                 }
 
 
+
                 // Server movement Lerp 
                 for (int i = 0; i < nbOfPlayers; i++)
                 {
-                    GameObject player = players[i];
+                    Player player = players[i].GetComponent<Player>();
                     Vector2 startClientPos = startPlayersPositions[i];
                     Vector2 endClientPos = endPlayersPositions[i];
                     float startClientRot = startPlayersRotations[i];
                     float endClientRot = endPlayersRotations[i];
                     float timeStartedLerping = timesStartedLerping[i];
+                    player.shootingElapsed += Time.deltaTime;
 
                     if (i != 0)
                     {
                         float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
                         //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, GameManager.FREQUENCY));
-                        players[i].transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
+                        player.transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
                         float lerpedRotation = Mathf.LerpAngle(startClientRot, endClientRot, lerpPercentage);
-                        players[i].GetComponent<Player>().SetRotation(lerpedRotation);
+                        player.SetRotation(lerpedRotation);
 
                         // If we havent moved then we are not walking
                         if (Vector2.Distance(startClientPos, endClientPos) < 0.1f)
                         {
-                            players[i].GetComponent<Player>().animator.SetBool("Walking", false);
+                            player.animator.SetBool("Walking", false);
                         }
                         else
                         {
-                            players[i].GetComponent<Player>().animator.SetBool("Walking", true);
+                            player.animator.SetBool("Walking", true);
+                        }
+
+                        if (player.shooting)
+                        {
+                            player.AnimateShooting(player.shootingElapsed);
+                            if (player.shootingElapsed >= player.frequency)
+                            {
+                                player.shootingElapsed = player.shootingElapsed % player.frequency;
+                                ClientShoot(i);
+                            }
                         }
                     }
                 }
@@ -247,15 +261,9 @@ public class Server : MonoBehaviour
                     startPlayersRotations[lastClientMovement] = players[lastClientMovement].GetComponent<Player>().visorRotation;
                     endPlayersRotations[lastClientMovement] = mm.visorRotation;
                     endPlayersPositions[lastClientMovement] = new Vector3(mm.x, mm.y);
+                    players[lastClientMovement].GetComponent<Player>().shooting = mm.shooting;
 
                     timesStartedLerping[lastClientMovement] = Time.time;
-                }
-                break;
-            case MessageType.SHOOT:
-                {
-                    ShootMessage sm = (ShootMessage)s.received;
-                    ClientShoot(sm.playerId);
-                    ShareShoots(sm.playerId);
                 }
                 break;
             case MessageType.CLIENT_GO_TO_NEXT_ROOM:
@@ -350,19 +358,21 @@ public class Server : MonoBehaviour
         // Player movements
         shareMovementsMessage.x = new float[nbOfPlayers];
         shareMovementsMessage.y = new float[nbOfPlayers];
+        shareMovementsMessage.shooting = new bool[nbOfPlayers];
         shareMovementsMessage.visorRotation = new float[nbOfPlayers];
 
         for (int i = 0; i < nbOfPlayers; i++)
         {
             shareMovementsMessage.x[i] = players[i].transform.position.x;
             shareMovementsMessage.y[i] = players[i].transform.position.y;
+            //Debug.Log("SHOOTING:" + players[i].GetComponent<Player>().shooting);
+            shareMovementsMessage.shooting[i] = players[i].GetComponent<Player>().shooting;
             shareMovementsMessage.visorRotation[i] = players[i].GetComponent<Player>().visorRotation;
         }
 
         // Monsters movements
         shareMovementsMessage.mx = new float[GameManager.MAX_MONSTERS];
         shareMovementsMessage.my = new float[GameManager.MAX_MONSTERS];
-        shareMovementsMessage.health = new int[GameManager.MAX_MONSTERS];
         if (spawner.monsters != null)
         {
 
@@ -372,7 +382,6 @@ public class Server : MonoBehaviour
                 {
                     shareMovementsMessage.mx[i] = spawner.monsters[i].transform.position.x;
                     shareMovementsMessage.my[i] = spawner.monsters[i].transform.position.y;
-                    shareMovementsMessage.health[i] = spawner.monsters[i].health;
                 }
             }
         }
@@ -383,7 +392,10 @@ public class Server : MonoBehaviour
     public void StartShooting()
     {
         shootingElapsed = 0;
-        shooting = true;
+        if (!player.died)
+        {
+            player.shooting = true;
+        }
     }
 
     public void ServerShoot()
@@ -393,13 +405,12 @@ public class Server : MonoBehaviour
         projectile.duration = GameManager.SHOOT_DURATION;
         projectile.transform.rotation = player.center.transform.rotation;
         projectiles.Add(p);
-        ShareShoots(0);
     }
 
     public void StopShooting()
     {
         player.StopShooting();
-        shooting = false;
+        player.shooting = false;
     }
 
     public void ClientShoot(int playerId)
@@ -409,13 +420,6 @@ public class Server : MonoBehaviour
         projectile.duration = GameManager.SHOOT_DURATION;
         projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
         projectiles.Add(p);
-    }
-
-    public void ShareShoots(int playerId)
-    {
-        ServerShareShootMessage shoot = new ServerShareShootMessage();
-        shoot.playerId = playerId;
-        s.ServerSend(shoot);
     }
 
     public void GoToNextRoom()

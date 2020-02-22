@@ -32,6 +32,9 @@ public class Player : MonoBehaviour
     public Pickable.Type type = Pickable.Type.PISTOL;
     public AnimationCurve recoilCurve;
 
+    public bool shooting;
+    public float shootingElapsed;
+
     void Start()
     {
         center = transform.GetChild(0).gameObject;
@@ -40,6 +43,8 @@ public class Player : MonoBehaviour
 
         animator = GetComponent<Animator>();
         recoilCurve.postWrapMode = WrapMode.Loop;
+
+        saveVisorPosition = new Vector3(0.7f, 0, 0);
     }
 
     public Vector2 GetVisorDirection()
@@ -183,10 +188,6 @@ public class Player : MonoBehaviour
 
     internal void AnimateShooting(float shootingElapsed)
     {
-        if(shootingElapsed == Time.deltaTime)
-        {
-            saveVisorPosition = new Vector3(0.7f, 0, 0);
-        }
         backwardsVisorPosition = visor.transform.localPosition * 0.25f;
         
         //Debug.Log(recoilCurve.Evaluate(Time.time * 1/frequency));

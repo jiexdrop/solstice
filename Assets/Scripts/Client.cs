@@ -44,7 +44,6 @@ public class Client : MonoBehaviour
     private float movementElapsed;
     private float shootingElapsed;
     private bool sharingMovements;
-    private bool shooting;
 
     UDPClient c = new UDPClient();
 
@@ -91,6 +90,16 @@ public class Client : MonoBehaviour
             panelsManager.ShowMenuPanel();
         }
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StartShooting();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            StopShooting();
+        }
+
         switch (state)
         {
             case GameState.STOP:
@@ -125,13 +134,13 @@ public class Client : MonoBehaviour
                 shootingElapsed += Time.deltaTime;
 
                 // Shooting
-                if (!player.died && shooting)
+                if (player.shooting)
                 {
                     player.AnimateShooting(shootingElapsed);
                     if (shootingElapsed >= player.frequency)
                     {
                         shootingElapsed = shootingElapsed % player.frequency;
-                        ClientShoot();
+                        ClientShoot(playerId);
                     }
                 }
 
@@ -154,7 +163,7 @@ public class Client : MonoBehaviour
                 // Lerp server shared movements
                 for (int i = 0; i < nbOfPlayers; i++)
                 {
-                    GameObject player = players[i];
+                    Player playerIndex = players[i].GetComponent<Player>();
                     Vector2 startServerPos = startPlayersPositions[i];
                     Vector2 endServerPos = endPlayersPositions[i];
                     float startServerRot = startPlayersRotations[i];
@@ -165,19 +174,30 @@ public class Client : MonoBehaviour
                     {
                         float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
                         // Position
-                        player.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
+                        playerIndex.transform.position = Vector3.Lerp(startServerPos, endServerPos, lerpPercentage);
                         // Rotation of the visor
                         float lerpedRotation = Mathf.LerpAngle(startServerRot, endServerRot, lerpPercentage);
-                        players[i].GetComponent<Player>().SetRotation(lerpedRotation);
+                        playerIndex.SetRotation(lerpedRotation);
 
                         // If we havent moved then we are not walking
                         if (Vector2.Distance(startServerPos, endServerPos) < 0.1f)
                         {
-                            players[i].GetComponent<Player>().animator.SetBool("Walking", false);
+                            playerIndex.animator.SetBool("Walking", false);
                         }
                         else
                         {
-                            players[i].GetComponent<Player>().animator.SetBool("Walking", true);
+                            playerIndex.animator.SetBool("Walking", true);
+                        }
+
+                        // Shooting
+                        if (playerIndex.shooting)
+                        {
+                            playerIndex.AnimateShooting(shootingElapsed);
+                            if (shootingElapsed >= playerIndex.frequency)
+                            {
+                                shootingElapsed = shootingElapsed % playerIndex.frequency;
+                                ClientShoot(i);
+                            }
                         }
                     }
                 }
@@ -276,16 +296,15 @@ public class Client : MonoBehaviour
 
                     for (int i = 0; i < shareMovementsMessage.x.Length; i++)
                     {
-
                         if (i != playerId)
                         {
                             startPlayersPositions[i] = players[i].transform.position;
                             startPlayersRotations[i] = players[i].GetComponent<Player>().visorRotation;
                             endPlayersRotations[i] = shareMovementsMessage.visorRotation[i];
                             endPlayersPositions[i] = new Vector2(shareMovementsMessage.x[i], shareMovementsMessage.y[i]);
+                            players[i].GetComponent<Player>().shooting = shareMovementsMessage.shooting[i];
                             timesStartedLerping[i] = Time.time;
                         }
-
                     }
 
                     startMonstersPositions = new Vector2[GameManager.MAX_MONSTERS];
@@ -298,21 +317,11 @@ public class Client : MonoBehaviour
                         if (spawner.monsters[i] != null)
                         {
                             startMonstersPositions[i] = spawner.monsters[i].transform.position;
-                            spawner.monsters[i].health = shareMovementsMessage.health[i];
                             endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
                             monstersTimesStartedLerping[i] = Time.time;
                         }
                     }
 
-                }
-                break;
-            case MessageType.SERVER_SHARE_SHOOT:
-                {
-                    ServerShareShootMessage ssm = (ServerShareShootMessage)c.received;
-                    if (ssm.playerId != playerId)
-                    {
-                        ServerShoot(ssm.playerId);
-                    }
                 }
                 break;
             case MessageType.SERVER_GO_TO_NEXT_ROOM:
@@ -364,28 +373,25 @@ public class Client : MonoBehaviour
     public void StartShooting()
     {
         shootingElapsed = 0;
-        shooting = true;
+        if (!player.died)
+        {
+            player.shooting = true;
+        }
     }
 
-    public void ClientShoot()
+    public void ClientShoot(int id)
     {
-        GameObject p = Instantiate(projectilePrefab, player.shootExit.transform.position, Quaternion.identity);
+        GameObject p = Instantiate(projectilePrefab, players[id].GetComponent<Player>().visor.transform.position, Quaternion.identity);
         Projectile projectile = p.GetComponent<Projectile>();
         projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = player.center.transform.rotation;
+        projectile.transform.rotation = players[id].GetComponent<Player>().center.transform.rotation;
         projectiles.Add(p);
-
-        ShootMessage shoot = new ShootMessage();
-        shoot.playerId = playerId;
-        shoot.duration = GameManager.SHOOT_DURATION;
-        c.ClientSend(shoot);
-
     }
 
     public void StopShooting()
     {
         player.StopShooting();
-        shooting = false;
+        player.shooting = false;
     }
 
 
@@ -405,6 +411,7 @@ public class Client : MonoBehaviour
         clientMovement.y = player.transform.position.y;
         clientMovement.visorRotation = player.GetComponent<Player>().visorRotation;
         clientMovement.playerId = playerId;
+        clientMovement.shooting = player.GetComponent<Player>().shooting;
 
         c.ClientSend(clientMovement);
     }
