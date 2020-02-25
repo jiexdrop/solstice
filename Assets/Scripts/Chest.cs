@@ -19,6 +19,8 @@ public class Chest : MonoBehaviour
     public Server server;
     public Client client;
 
+    public int seed;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,6 +44,7 @@ public class Chest : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().sprite = openSprite;
             pickables[room] = Instantiate(pickablePrefab, transform.position, Quaternion.identity);
+            pickables[room].GetComponent<Pickable>().seed = seed;
             pickables[room].GetComponent<Pickable>().server = server;
             pickables[room].GetComponent<Pickable>().client = client;
             opened = true;

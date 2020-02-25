@@ -14,6 +14,7 @@ public class DungeonGeneration : MonoBehaviour
     [Header("Prefabs")]
     public GameObject portalPrefab;
     public GameObject chestPrefab;
+    public GameObject pickablePrefab;
 
     public GameObject portal;
 
@@ -80,6 +81,7 @@ public class DungeonGeneration : MonoBehaviour
         pickables = new Dictionary<Room, GameObject>();
         int limit = 2;
         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, room, chests, seed, limit, 0);
+        InitialStuff(room, pickables, seed);
 
         if (chests.ContainsKey(lastRoom)) Destroy(chests[lastRoom]);
         lastRoom.type = Room.Type.PORTAL;
@@ -99,6 +101,7 @@ public class DungeonGeneration : MonoBehaviour
                 chests[room].GetComponent<Chest>().room = room;
                 chests[room].GetComponent<Chest>().server = server;
                 chests[room].GetComponent<Chest>().client = client;
+                chests[room].GetComponent<Chest>().seed = seed;
                 chests[room].GetComponent<Chest>().pickables = pickables;
 
                 break;
@@ -140,6 +143,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
+                                        seed = seed + Random.Range(0, int.MaxValue);
                                         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
@@ -167,6 +171,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
+                                        seed = seed + Random.Range(0, int.MaxValue);
                                         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
@@ -195,6 +200,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
+                                        seed = seed + Random.Range(0, int.MaxValue);
                                         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
@@ -223,6 +229,7 @@ public class DungeonGeneration : MonoBehaviour
                                     {
                                         road.Generate(backgroundTilemap, wallsTilemap, tiles);
                                         roads.Add(road);
+                                        seed = seed + Random.Range(0, int.MaxValue);
                                         GenerateRecursively(backgroundTilemap, wallsTilemap, tiles, nextRoom, chests, seed, --limit, ++depth);
                                     }
                                 }
@@ -258,6 +265,14 @@ public class DungeonGeneration : MonoBehaviour
 
         }
         room.Generate(backgroundTilemap, wallsTilemap, tiles, seed);
+    }
+
+    private void InitialStuff(Room room, Dictionary<Room, GameObject> pickables, int seed)
+    {
+        pickables[room] = Instantiate(pickablePrefab, new Vector3(room.x + 0.5f, room.y + 2.5f, 0), Quaternion.identity);
+        pickables[room].GetComponent<Pickable>().server = server;
+        pickables[room].GetComponent<Pickable>().client = client;
+        pickables[room].GetComponent<Pickable>().seed = seed + Random.Range(0, int.MaxValue);
     }
 
     internal void CloseRoom(int key)

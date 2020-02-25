@@ -139,7 +139,7 @@ MonoBehaviour:
   client: {fileID: 0}
   frequency: 0.2
   dammage: 1
-  type: 3
+  type: 4
   recoilCurve:
     serializedVersion: 2
     m_Curve:
@@ -293,7 +293,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 21300006, guid: cce0202eb1d390d4f9444ede62b9b9c3, type: 3}
+  m_Sprite: {fileID: 21300008, guid: cce0202eb1d390d4f9444ede62b9b9c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

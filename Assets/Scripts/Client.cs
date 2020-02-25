@@ -198,6 +198,9 @@ public class Client : MonoBehaviour
                                 shootingElapsed = shootingElapsed % playerIndex.frequency;
                                 ClientShoot(i);
                             }
+                        } else
+                        {
+                            playerIndex.StopShooting();
                         }
                     }
                 }
@@ -381,11 +384,18 @@ public class Client : MonoBehaviour
 
     public void ClientShoot(int id)
     {
-        GameObject p = Instantiate(projectilePrefab, players[id].GetComponent<Player>().visor.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = players[id].GetComponent<Player>().center.transform.rotation;
-        projectiles.Add(p);
+        switch (players[id].GetComponent<Player>().type)
+        {
+            case Pickable.Type.KATANA:
+                break;
+            default:
+                GameObject p = Instantiate(projectilePrefab, players[id].GetComponent<Player>().visor.transform.position, Quaternion.identity);
+                Projectile projectile = p.GetComponent<Projectile>();
+                projectile.duration = GameManager.SHOOT_DURATION;
+                projectile.transform.rotation = players[id].GetComponent<Player>().center.transform.rotation;
+                projectiles.Add(p);
+                break;
+        }
     }
 
     public void StopShooting()
@@ -397,11 +407,18 @@ public class Client : MonoBehaviour
 
     public void ServerShoot(int playerId)
     {
-        GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
-        projectiles.Add(p);
+        switch (players[playerId].GetComponent<Player>().type)
+        {
+            case Pickable.Type.KATANA:
+                break;
+            default:
+                GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
+                Projectile projectile = p.GetComponent<Projectile>();
+                projectile.duration = GameManager.SHOOT_DURATION;
+                projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
+                projectiles.Add(p);
+                break;
+        }
     }
 
     public void SendPosition(GameObject player)

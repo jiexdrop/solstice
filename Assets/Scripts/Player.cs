@@ -148,8 +148,6 @@ public class Player : MonoBehaviour
         return visorRotation;
     }
 
-
-
     internal void SetRotation(Vector2 inputVector)
     {
         visorRotation = -Mathf.Atan2(inputVector.x, inputVector.y) * Mathf.Rad2Deg + 90;
@@ -184,15 +182,30 @@ public class Player : MonoBehaviour
     }
 
     public Vector3 backwardsVisorPosition;
+    public float topVisorRotation;
+    public float bottomVisorRotation;
     public Vector3 saveVisorPosition;
+    private bool startShooting;
+
+    internal void StartShooting()
+    {
+        topVisorRotation = center.transform.localRotation.eulerAngles.z - 45;
+        bottomVisorRotation = center.transform.localRotation.eulerAngles.z + 45;
+    }
 
     internal void AnimateShooting(float shootingElapsed)
     {
         backwardsVisorPosition = visor.transform.localPosition * 0.25f;
-        
+
+        if (!startShooting)
+        {
+            startShooting = true;
+            StartShooting();
+        }
+
         //Debug.Log(recoilCurve.Evaluate(Time.time * 1/frequency));
         //Debug.Log("shootingElapsed " + shootingElapsed);
-
+        
         switch (type)
         {
             case Pickable.Type.PISTOL:
@@ -207,11 +220,17 @@ public class Player : MonoBehaviour
                     visor.transform.localPosition = Vector2.Lerp(saveVisorPosition, backwardsVisorPosition, lerpPercent);
                 }
                 break;
+            case Pickable.Type.KATANA:
+                {
+                    float lerpPercent = recoilCurve.Evaluate(Time.time * 1 / frequency);
+                    SetRotation(Mathf.Lerp(topVisorRotation, bottomVisorRotation, lerpPercent));
+                }
+                break;
         }
 
         if (shootingElapsed >= frequency)
         {
-            Debug.Log("End animate shooting");
+            //Debug.Log("End animate shooting");
             //visor.transform.localPosition = saveVisorPosition;
         }
     }
@@ -225,7 +244,10 @@ public class Player : MonoBehaviour
         {
             health = GameManager.MAX_HEALTH;
         }
-        healthBar.value = health;
+        if (healthBar != null) // if player has healthbar visible
+        {
+            healthBar.value = health;
+        }
     }
 
     public void OnCollisionEnter2D(Collision2D collision)
@@ -253,5 +275,6 @@ public class Player : MonoBehaviour
     public void StopShooting()
     {
         visor.transform.localPosition = saveVisorPosition;
+        startShooting = false;
     }
 }

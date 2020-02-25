@@ -195,40 +195,44 @@ public class Server : MonoBehaviour
                 // Server movement Lerp 
                 for (int i = 0; i < nbOfPlayers; i++)
                 {
-                    Player player = players[i].GetComponent<Player>();
+                    Player playerIndex = players[i].GetComponent<Player>();
                     Vector2 startClientPos = startPlayersPositions[i];
                     Vector2 endClientPos = endPlayersPositions[i];
                     float startClientRot = startPlayersRotations[i];
                     float endClientRot = endPlayersRotations[i];
                     float timeStartedLerping = timesStartedLerping[i];
-                    player.shootingElapsed += Time.deltaTime;
+                    playerIndex.shootingElapsed += Time.deltaTime;
 
                     if (i != 0)
                     {
                         float lerpPercentage = (Time.time - timeStartedLerping) / GameManager.FREQUENCY;
                         //Debug.Log(string.Format("lerpPercent[{0}] = (time[{1}] - tS[{2}]) / tTRG[{3}]", lerpPercentage, Time.time, timeStartedLerping, GameManager.FREQUENCY));
-                        player.transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
+                        playerIndex.transform.position = Vector3.Lerp(startClientPos, endClientPos, lerpPercentage);
                         float lerpedRotation = Mathf.LerpAngle(startClientRot, endClientRot, lerpPercentage);
-                        player.SetRotation(lerpedRotation);
+                        playerIndex.SetRotation(lerpedRotation);
 
                         // If we havent moved then we are not walking
                         if (Vector2.Distance(startClientPos, endClientPos) < 0.1f)
                         {
-                            player.animator.SetBool("Walking", false);
+                            playerIndex.animator.SetBool("Walking", false);
                         }
                         else
                         {
-                            player.animator.SetBool("Walking", true);
+                            playerIndex.animator.SetBool("Walking", true);
                         }
+                        
 
-                        if (player.shooting)
+                        if (playerIndex.shooting)
                         {
-                            player.AnimateShooting(player.shootingElapsed);
-                            if (player.shootingElapsed >= player.frequency)
+                            playerIndex.AnimateShooting(playerIndex.shootingElapsed);
+                            if (playerIndex.shootingElapsed >= playerIndex.frequency)
                             {
-                                player.shootingElapsed = player.shootingElapsed % player.frequency;
+                                playerIndex.shootingElapsed = playerIndex.shootingElapsed % playerIndex.frequency;
                                 ClientShoot(i);
                             }
+                        } else
+                        {
+                            playerIndex.StopShooting();
                         }
                     }
                 }
@@ -400,11 +404,18 @@ public class Server : MonoBehaviour
 
     public void ServerShoot()
     {
-        GameObject p = Instantiate(projectilePrefab, player.shootExit.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = player.center.transform.rotation;
-        projectiles.Add(p);
+        switch (player.GetComponent<Player>().type)
+        {
+            case Pickable.Type.KATANA:
+                break;
+            default:
+                GameObject p = Instantiate(projectilePrefab, player.shootExit.transform.position, Quaternion.identity);
+                Projectile projectile = p.GetComponent<Projectile>();
+                projectile.duration = GameManager.SHOOT_DURATION;
+                projectile.transform.rotation = player.center.transform.rotation;
+                projectiles.Add(p);
+                break;
+        }
     }
 
     public void StopShooting()
@@ -415,11 +426,18 @@ public class Server : MonoBehaviour
 
     public void ClientShoot(int playerId)
     {
-        GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
-        Projectile projectile = p.GetComponent<Projectile>();
-        projectile.duration = GameManager.SHOOT_DURATION;
-        projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
-        projectiles.Add(p);
+        switch (players[playerId].GetComponent<Player>().type)
+        {
+            case Pickable.Type.KATANA:
+                break;
+            default:
+                GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
+                Projectile projectile = p.GetComponent<Projectile>();
+                projectile.duration = GameManager.SHOOT_DURATION;
+                projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
+                projectiles.Add(p);
+                break;
+        }
     }
 
     public void GoToNextRoom()

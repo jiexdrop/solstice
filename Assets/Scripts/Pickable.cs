@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Pickable : MonoBehaviour
 {
@@ -30,16 +32,20 @@ public class Pickable : MonoBehaviour
 
     public List<Sprite> sprites;
 
+    public int seed;
+
     // Start is called before the first frame update
     void Start()
     {
         upPosition = transform.position;
         upPosition.y += 0.5f;
+
+        Random.InitState(seed);
         type = (Type)Random.Range(0, (int)Type.COUNT);
 
         GetComponent<SpriteRenderer>().sprite = sprites[(int)type];
-        
     }
+
 
     // Update is called once per frame
     void Update()
@@ -95,4 +101,5 @@ public class Pickable : MonoBehaviour
             }
         }
     }
+
 }
