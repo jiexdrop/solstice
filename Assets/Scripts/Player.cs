@@ -35,9 +35,13 @@ public class Player : MonoBehaviour
     public bool shooting;
     public float shootingElapsed;
 
+    private BoxCollider2D swordCollider;
+
     void Start()
     {
         center = transform.GetChild(0).gameObject;
+        swordCollider = center.GetComponent<BoxCollider2D>();
+        swordCollider.enabled = false;
         visor = center.transform.GetChild(0).gameObject;
         shootExit = visor.transform.GetChild(0).gameObject;
 
@@ -92,7 +96,7 @@ public class Player : MonoBehaviour
                 break;
 
             case Pickable.Type.KATANA:
-                frequency = 1f;
+                frequency = 0.4f;
                 dammage = 3;
                 visor.GetComponent<SpriteRenderer>().sprite = pickable.sprites[(int)pickable.type];
                 visor.transform.localRotation = Quaternion.identity;
@@ -191,6 +195,12 @@ public class Player : MonoBehaviour
     {
         topVisorRotation = center.transform.localRotation.eulerAngles.z - 45;
         bottomVisorRotation = center.transform.localRotation.eulerAngles.z + 45;
+        switch(type)
+        {
+            case Pickable.Type.KATANA:
+                swordCollider.enabled = true;
+                break;
+        }
     }
 
     internal void AnimateShooting(float shootingElapsed)
@@ -276,5 +286,11 @@ public class Player : MonoBehaviour
     {
         visor.transform.localPosition = saveVisorPosition;
         startShooting = false;
+        switch (type)
+        {
+            case Pickable.Type.KATANA:
+                swordCollider.enabled = false;
+                break;
+        }
     }
 }

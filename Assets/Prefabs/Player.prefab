@@ -139,7 +139,7 @@ MonoBehaviour:
   client: {fileID: 0}
   frequency: 0.2
   dammage: 1
-  type: 4
+  type: 3
   recoilCurve:
     serializedVersion: 2
     m_Curve:
@@ -167,6 +167,8 @@ MonoBehaviour:
   shooting: 0
   shootingElapsed: 0
   backwardsVisorPosition: {x: 0, y: 0, z: 0}
+  topVisorRotation: 0
+  bottomVisorRotation: 0
   saveVisorPosition: {x: 0, y: 0, z: 0}
 --- !u!50 &8656424616374944273
 Rigidbody2D:
@@ -293,7 +295,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 21300008, guid: cce0202eb1d390d4f9444ede62b9b9c3, type: 3}
+  m_Sprite: {fileID: 21300006, guid: cce0202eb1d390d4f9444ede62b9b9c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -313,9 +315,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 586211497766579940}
+  - component: {fileID: 164219804570032124}
   m_Layer: 0
   m_Name: Center
-  m_TagString: Untagged
+  m_TagString: PlayerSword
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -335,3 +338,29 @@ Transform:
   m_Father: {fileID: 3314557595949612383}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &164219804570032124
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4129204962955527957}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.7, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1.1, y: 0.3}
+  m_EdgeRadius: 0

@@ -10,6 +10,7 @@ TagManager:
   - MonsterProjectile
   - Walls
   - Chest
+  - PlayerSword
   layers:
   - Default
   - TransparentFX

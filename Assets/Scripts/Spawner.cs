@@ -78,21 +78,13 @@ public class Spawner : MonoBehaviour
         {
             foreach (KeyValuePair<int, Room> room in rooms)
             {
-                switch (room.Value.type)
+                if (room.Value.playerEntered && !room.Value.killedMonsters)
                 {
-                    case Room.Type.MONSTER:
-                        if (room.Value.playerEntered && !room.Value.killedMonsters)
-                        {
-                            if (server != null)
-                            {
-                                server.dungeonGeneration.CloseRoom(room.Key);
-                            }
-                            if(client != null)
-                            {
-                                client.dungeonGeneration.CloseRoom(room.Key);
-                            }
+                    switch (room.Value.type)
+                    {
+                        case Room.Type.MONSTER:
                             bool allMonstersDied = true;
-                            for(int i = 0; i < monsters.Length; i++)
+                            for (int i = 0; i < monsters.Length; i++)
                             {
                                 //Debug.Log(monsters[i]);
                                 if (monsters[i] != null) // If one monster is alive
@@ -114,23 +106,27 @@ public class Spawner : MonoBehaviour
                                     client.dungeonGeneration.OpenRoom(room.Key);
                                 }
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
+                
                 if (room.Value.inside && !room.Value.spawnedMonsters)
                 {
                     switch (room.Value.type)
                     {
                         case Room.Type.MONSTER:
+  
                             int seed = Random.Range(0, Int32.MaxValue);
                             SpawnMonsters(room.Key, seed);
                             if (server != null)
                             {
                                 server.ShareSpawnMonsters(room.Key, 0, seed, true); // 0 server playerId
+                                server.dungeonGeneration.CloseRoom(room.Key);
                             }
                             if (client != null)
                             {
                                 client.SpawnMonsters(room.Key, seed, true);
+                                client.dungeonGeneration.CloseRoom(room.Key);
                             }
 
                             break;
@@ -141,7 +137,7 @@ public class Spawner : MonoBehaviour
         }
 
         // Remove monsters if toRemove set
-        for (int i = 0; i< monsters.Length; i++)
+        for (int i = 0; i < monsters.Length; i++)
         {
             if (monsters[i] != null && monsters[i].toRemove)
             {

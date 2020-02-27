@@ -230,7 +230,7 @@ public class Client : MonoBehaviour
 
 
         // Client read received messages
-        Debug.Log(c.received.type);
+        //Debug.Log(c.received.type);
         switch (c.received.type)
         {
             case MessageType.NONE:
@@ -348,7 +348,7 @@ public class Client : MonoBehaviour
                     // If I'm not the one that has sent the request to spawn monsters
                     if (ssmsm.playerId != playerId)
                     {
-                        spawner.SpawnMonsters(ssmsm.roomId, ssmsm.seed);
+                        //spawner.SpawnMonsters(ssmsm.roomId, ssmsm.seed);
                         if (ssmsm.teleport)
                         {
                             Player player = players[ssmsm.playerId].GetComponent<Player>();
@@ -448,6 +448,12 @@ public class Client : MonoBehaviour
         c.ClientSend(goToNextRoomMessage);
     }
 
+    /// <summary>
+    /// Send to the server a call to spawn monsters
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="seed"></param>
+    /// <param name="teleport"></param>
     public void SpawnMonsters(int roomId, int seed, bool teleport)
     {
         ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = new ClientShareMonstersSpawnMessage();

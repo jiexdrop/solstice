@@ -295,16 +295,13 @@ public class Room
         playerPos.x = Mathf.RoundToInt(player.transform.position.x);
         playerPos.y = Mathf.RoundToInt(player.transform.position.y);
 
-        for (int i = -width / 2 + x; i <= width / 2 + x; i++)
+        int halfWidth = width / 2;
+        int halfHeight = height / 2;
+
+        if(playerPos.x > - halfWidth + x && playerPos.x <= halfWidth + x 
+            && playerPos.y > -halfHeight + y && playerPos.y <= halfHeight + y)
         {
-            for (int j = -height / 2 + y; j <= height / 2 + y; j++)
-            {
-                Vector3Int pos = new Vector3Int(i, j, 0);
-                if (playerPos.Equals(pos))
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
         return false;
@@ -316,16 +313,13 @@ public class Room
         playerPos.x = Mathf.RoundToInt(player.transform.position.x);
         playerPos.y = Mathf.RoundToInt(player.transform.position.y);
 
-        for (int i = -width / 2 + x + 1; i < width / 2 + x; i++)
+        int halfWidth = width / 2;
+        int halfHeight = height / 2;
+
+        if (playerPos.x > -halfWidth + x + 1 && playerPos.x < halfWidth + x
+            && playerPos.y > -halfHeight + y + 1 && playerPos.y < halfHeight + y)
         {
-            for (int j = -height / 2 + y + 1; j < height / 2 + y; j++)
-            {
-                Vector3Int pos = new Vector3Int(i, j, 0);
-                if (playerPos.Equals(pos))
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
         return false;

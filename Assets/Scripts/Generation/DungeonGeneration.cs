@@ -272,7 +272,8 @@ public class DungeonGeneration : MonoBehaviour
         pickables[room] = Instantiate(pickablePrefab, new Vector3(room.x + 0.5f, room.y + 2.5f, 0), Quaternion.identity);
         pickables[room].GetComponent<Pickable>().server = server;
         pickables[room].GetComponent<Pickable>().client = client;
-        pickables[room].GetComponent<Pickable>().seed = seed + Random.Range(0, int.MaxValue);
+        //pickables[room].GetComponent<Pickable>().seed = seed + Random.Range(0, int.MaxValue);
+        pickables[room].GetComponent<Pickable>().seed = 0; // 0 is for katana
     }
 
     internal void CloseRoom(int key)

@@ -475,6 +475,13 @@ public class Server : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Tell the clients to spawn monsters
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="playerId"></param>
+    /// <param name="seed"></param>
+    /// <param name="teleport"></param>
     public void ShareSpawnMonsters(int roomId, int playerId, int seed, bool teleport)
     {
         ServerShareMonstersSpawnMessage shareMonstersSpawnMessage = new ServerShareMonstersSpawnMessage();
@@ -502,7 +509,10 @@ public class Server : MonoBehaviour
 
     public void OnDestroy()
     {
-        s.Close();
-        os.Close();
+        if (GameManager.Instance.type.Equals(ConnectionType.SERVER))
+        {
+            s.Close();
+            os.Close();
+        }
     }
 }
