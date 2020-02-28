@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
 
     public const float FREQUENCY = 1f / 10f;
     public const float SHOOT_DURATION = 1f;
-    public const int PACKET_LENGTH = 512;
+    public const int PACKET_LENGTH = 1024;
     public const int PORT = 7345;
     public const int MAX_MONSTERS = 10;
     public const int MAX_HEALTH = 10;

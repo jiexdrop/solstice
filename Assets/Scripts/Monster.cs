@@ -88,7 +88,7 @@ public class Monster : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("PlayerProjectile"))
         {
-            health--;
+            health -= collision.GetComponent<Projectile>().damage;
             r.material.color = Color.red;
             colorLasting += Time.deltaTime * 2;
         }

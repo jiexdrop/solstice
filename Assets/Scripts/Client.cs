@@ -321,6 +321,7 @@ public class Client : MonoBehaviour
                         {
                             startMonstersPositions[i] = spawner.monsters[i].transform.position;
                             endMonstersPositions[i] = new Vector3(shareMovementsMessage.mx[i], shareMovementsMessage.my[i]);
+                            spawner.monsters[i].health = shareMovementsMessage.health[i];
                             monstersTimesStartedLerping[i] = Time.time;
                         }
                     }
@@ -382,17 +383,18 @@ public class Client : MonoBehaviour
         }
     }
 
-    public void ClientShoot(int id)
+    public void ClientShoot(int playerId)
     {
-        switch (players[id].GetComponent<Player>().type)
+        switch (players[playerId].GetComponent<Player>().type)
         {
             case Pickable.Type.KATANA:
                 break;
             default:
-                GameObject p = Instantiate(projectilePrefab, players[id].GetComponent<Player>().visor.transform.position, Quaternion.identity);
+                GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
                 Projectile projectile = p.GetComponent<Projectile>();
+                projectile.damage = players[playerId].GetComponent<Player>().dammage;
                 projectile.duration = GameManager.SHOOT_DURATION;
-                projectile.transform.rotation = players[id].GetComponent<Player>().center.transform.rotation;
+                projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
                 projectiles.Add(p);
                 break;
         }
@@ -414,6 +416,7 @@ public class Client : MonoBehaviour
             default:
                 GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
                 Projectile projectile = p.GetComponent<Projectile>();
+                projectile.damage = players[playerId].GetComponent<Player>().dammage;
                 projectile.duration = GameManager.SHOOT_DURATION;
                 projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
                 projectiles.Add(p);

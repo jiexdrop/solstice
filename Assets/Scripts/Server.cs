@@ -279,7 +279,7 @@ public class Server : MonoBehaviour
             case MessageType.CLIENT_SHARE_MONSTERS_SPAWN:
                 {
                     ClientShareMonstersSpawnMessage shareMonstersSpawnMessage = (ClientShareMonstersSpawnMessage)s.received;
-                    spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
+                    //spawner.SpawnMonsters(shareMonstersSpawnMessage.roomId, shareMonstersSpawnMessage.seed);
                     // Teleportation
                     if (shareMonstersSpawnMessage.teleport)
                     {
@@ -377,15 +377,17 @@ public class Server : MonoBehaviour
         // Monsters movements
         shareMovementsMessage.mx = new float[GameManager.MAX_MONSTERS];
         shareMovementsMessage.my = new float[GameManager.MAX_MONSTERS];
+        shareMovementsMessage.health = new int[GameManager.MAX_MONSTERS];
         if (spawner.monsters != null)
         {
-
             for (int i = 0; i < GameManager.MAX_MONSTERS; i++)
             {
+                shareMovementsMessage.health[i] = 0;
                 if (spawner.monsters[i] != null)
                 {
                     shareMovementsMessage.mx[i] = spawner.monsters[i].transform.position.x;
                     shareMovementsMessage.my[i] = spawner.monsters[i].transform.position.y;
+                    shareMovementsMessage.health[i] = spawner.monsters[i].health;
                 }
             }
         }
@@ -411,6 +413,7 @@ public class Server : MonoBehaviour
             default:
                 GameObject p = Instantiate(projectilePrefab, player.shootExit.transform.position, Quaternion.identity);
                 Projectile projectile = p.GetComponent<Projectile>();
+                projectile.damage = player.GetComponent<Player>().dammage;
                 projectile.duration = GameManager.SHOOT_DURATION;
                 projectile.transform.rotation = player.center.transform.rotation;
                 projectiles.Add(p);
@@ -433,6 +436,7 @@ public class Server : MonoBehaviour
             default:
                 GameObject p = Instantiate(projectilePrefab, players[playerId].GetComponent<Player>().visor.transform.position, Quaternion.identity);
                 Projectile projectile = p.GetComponent<Projectile>();
+                projectile.damage = players[playerId].GetComponent<Player>().dammage;
                 projectile.duration = GameManager.SHOOT_DURATION;
                 projectile.transform.rotation = players[playerId].GetComponent<Player>().center.transform.rotation;
                 projectiles.Add(p);

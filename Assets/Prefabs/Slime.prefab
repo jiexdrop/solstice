@@ -114,11 +114,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa384ff912c5a5a4184bce09e9612f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 3
+  health: 2
   isServer: 0
   toRemove: 0
   projectilePrefab: {fileID: 1604766832769618964, guid: 3c27a2df2e04fde4d9731bf1c8ac760f,
     type: 3}
+  players:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  nbOfPlayers: 0
 --- !u!50 &5047604725132716717
 Rigidbody2D:
   serializedVersion: 4
