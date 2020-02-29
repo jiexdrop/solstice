@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum MonsterType
+{
+    SLIME,
+    WITCH,
+    OGRE
+}
+
 public class Monster : MonoBehaviour
 {
     public int health = 3;
@@ -25,7 +32,7 @@ public class Monster : MonoBehaviour
     void Start()
     {
         randomMovement = Random.insideUnitCircle * 4 * Time.deltaTime;
-        r = GetComponent<Renderer>();
+        r = GetComponentInChildren<Renderer>();
     }
 
     // Update is called once per frame
@@ -76,6 +83,17 @@ public class Monster : MonoBehaviour
         Quaternion rotation = Random.rotation;
         rotation.x = 0; rotation.y = 0;
         int playerId = Random.Range(0, nbOfPlayers);
+        float maxDist = Vector3.Distance(players[0].transform.position, transform.position);
+        // get nearest player
+        for(int i = 0; i < nbOfPlayers; i++)
+        {
+            float dist = Vector3.Distance(players[i].transform.position, transform.position);
+            if (dist < maxDist)
+            {
+                playerId = i;
+                maxDist = dist;
+            }
+        }
         float angle = Mathf.Atan2(players[playerId].transform.position.y - transform.position.y, players[playerId].transform.position.x - transform.position.x);
 
         Physics2D.IgnoreCollision(GetComponent<Collider2D>(), p.GetComponent<Collider2D>());

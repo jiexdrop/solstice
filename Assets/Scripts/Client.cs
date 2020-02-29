@@ -268,6 +268,7 @@ public class Client : MonoBehaviour
                         seed = sharePlayersMessage.seed;
                         dungeonGeneration.SetClient(this);
                         dungeonGeneration.Generate(seed);
+                        spawner.seed = seed;
                         spawner.SetClient(this);
                         spawner.ClearMonsters();
                         spawner.rooms = dungeonGeneration.rooms;

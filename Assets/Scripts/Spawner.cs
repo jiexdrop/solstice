@@ -17,6 +17,26 @@ public class Spawner : MonoBehaviour
     private Server server;
     private Client client;
 
+    public List<Wave> waves;
+    public int waveIndex;
+
+    public int lastRoomKey;
+
+    public int seed;
+
+    [Serializable]
+    public class Wave
+    {
+        public List<MonsterCount> monsterCounts;
+    }
+
+    [Serializable]
+    public class MonsterCount
+    {
+        public MonsterType monsterType;
+        public int count;
+    }
+
     public void ClearMonsters()
     {
         for (int i = 0; i < monsters.Length; i++)
@@ -30,7 +50,7 @@ public class Spawner : MonoBehaviour
         Destroy(monstersParent);
     }
 
-    public void SpawnMonsters(int roomId, int seed)
+    public void SpawnMonsters(int roomId, int seed, Wave wave)
     {
         Room room = rooms[roomId];
         //Debug.Log(string.Format("Spawn monsters at room{0} key{1} with seed{2}", room, roomId, seed));
@@ -38,33 +58,35 @@ public class Spawner : MonoBehaviour
         ClearMonsters();
         monstersParent = new GameObject(string.Format("Room {0} monsters", roomId));
 
-        for (int i = 0; i < 10; i++)
+        for (int k = 0; k < wave.monsterCounts.Count; k++)
         {
-            int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
-            int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
-            int wichMonster = Random.Range(0, monsterPrefabs.Length);
-
-            monsters[i] = Instantiate(monsterPrefabs[wichMonster], new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monstersParent.transform).GetComponent<Monster>();
-
-            // Ignore collisions between players and ennemies
-            if (server != null)
+            for (int i = 0; i < wave.monsterCounts[k].count; i++)
             {
-                for (int j = 0; j < server.nbOfPlayers; j++)
+                int rangeX = Random.Range(-(room.width - (room.width / 4)), (room.width - (room.width / 4))) / 2;
+                int rangeY = Random.Range(-(room.height - (room.height / 4)), (room.height - (room.height / 4))) / 2;
+
+                monsters[i] = Instantiate(monsterPrefabs[(int)wave.monsterCounts[k].monsterType], new Vector3Int(room.x + rangeX, room.y + rangeY, 0), Quaternion.identity, monstersParent.transform).GetComponent<Monster>();
+
+                // Ignore collisions between players and ennemies
+                if (server != null)
                 {
-                    Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
+                    for (int j = 0; j < server.nbOfPlayers; j++)
+                    {
+                        Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), server.players[j].GetComponent<Collider2D>());
+                    }
+                    monsters[i].GetComponent<Monster>().isServer = true;
+                    monsters[i].GetComponent<Monster>().players = server.players;
+                    monsters[i].GetComponent<Monster>().nbOfPlayers = server.nbOfPlayers;
                 }
-                monsters[i].GetComponent<Monster>().isServer = true;
-                monsters[i].GetComponent<Monster>().players = server.players;
-                monsters[i].GetComponent<Monster>().nbOfPlayers = server.nbOfPlayers;
-            }
-            if (client != null)
-            {
-                for (int j = 0; j < client.nbOfPlayers; j++)
+                if (client != null)
                 {
-                    Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
+                    for (int j = 0; j < client.nbOfPlayers; j++)
+                    {
+                        Physics2D.IgnoreCollision(monsters[i].GetComponent<Collider2D>(), client.players[j].GetComponent<Collider2D>());
+                    }
+                    monsters[i].GetComponent<Monster>().players = client.players;
+                    monsters[i].GetComponent<Monster>().nbOfPlayers = client.nbOfPlayers;
                 }
-                monsters[i].GetComponent<Monster>().players = client.players;
-                monsters[i].GetComponent<Monster>().nbOfPlayers = client.nbOfPlayers;
             }
         }
 
@@ -94,7 +116,12 @@ public class Spawner : MonoBehaviour
                             }
 
                             // If all monsters died open room
-                            if (allMonstersDied)
+                            if (allMonstersDied && waveIndex < waves.Count)
+                            {
+                                room.Value.spawnedMonsters = false;
+                                waveIndex++;
+                            }
+                            if (allMonstersDied && waveIndex >= waves.Count)
                             {
                                 room.Value.killedMonsters = true;
                                 if (server != null)
@@ -105,19 +132,28 @@ public class Spawner : MonoBehaviour
                                 {
                                     client.dungeonGeneration.OpenRoom(room.Key);
                                 }
+                                room.Value.spawnedMonsters = true;
                             }
                             break;
                     }
                 }
-                
+
+
+
                 if (room.Value.inside && !room.Value.spawnedMonsters)
                 {
                     switch (room.Value.type)
                     {
                         case Room.Type.MONSTER:
-  
-                            int seed = Random.Range(0, Int32.MaxValue);
-                            SpawnMonsters(room.Key, seed);
+                            //when we change room we reset spawner
+                            if(room.Key != lastRoomKey)
+                            {
+                                waveIndex = 0;
+                                lastRoomKey = room.Key;
+                            }
+
+                            SpawnMonsters(room.Key, seed, waves[waveIndex]);
+                            
                             if (server != null)
                             {
                                 server.ShareSpawnMonsters(room.Key, 0, seed, true); // 0 server playerId

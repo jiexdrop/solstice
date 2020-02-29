@@ -77,6 +77,7 @@ public class Server : MonoBehaviour
             seed = Random.Range(0, Int32.MaxValue);
             dungeonGeneration.SetServer(this);
             spawner.SetServer(this);
+            spawner.seed = seed;
             dungeonGeneration.Generate(seed);
             spawner.rooms = dungeonGeneration.rooms;
         }
@@ -104,6 +105,7 @@ public class Server : MonoBehaviour
             seed = Random.Range(0, Int32.MaxValue);
             dungeonGeneration.Clear();
             spawner.SetServer(this);
+            spawner.seed = seed;
             spawner.ClearMonsters();
             dungeonGeneration.Generate(seed);
         }

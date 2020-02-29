@@ -2324,6 +2324,7 @@ MonoBehaviour:
   monsterPrefabs:
   - {fileID: 3465560508448569828, guid: be90e6e636da7264c8ce8b9284be973c, type: 3}
   - {fileID: 4564508714913364031, guid: 7c359f5ea803f4e4b9b8ba9bce61df3c, type: 3}
+  - {fileID: 4564508714913364031, guid: cdeb33fc048a68b40b84bd8e23bab3b9, type: 3}
   monstersParent: {fileID: 0}
   monsters:
   - {fileID: 0}
@@ -2339,6 +2340,19 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   monstersToRemove: 
+  waves:
+  - monsterCounts:
+    - monsterType: 0
+      count: 4
+  - monsterCounts:
+    - monsterType: 0
+      count: 3
+    - monsterType: 1
+      count: 1
+  - monsterCounts:
+    - monsterType: 2
+      count: 1
+  waveIndex: 0
 --- !u!4 &1424886050
 Transform:
   m_ObjectHideFlags: 0
